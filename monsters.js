@@ -36,6 +36,7 @@ function MonsterAnimal(x,y)
     this.hitBar.anchor.setTo(1, 0.5);
     this.sprite.addChild(this.hitBar);
     this.hitBar.visible =false;
+    this.hitBar.alpha = 0.7;
 }
 
 MonsterAnimal.prototype.setSpritePosition = function()
