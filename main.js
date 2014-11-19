@@ -19,6 +19,10 @@ var mainState = {
   
   update: function()
   {
+      for (var i=0;i<this.world.numEnemies;i++)
+	if (this.world.enemies[i].alive)
+	  this.world.enemies[i].move();
+	
       if (!AiTurn)
       {
 	this.player.move();
@@ -33,23 +37,28 @@ var mainState = {
   {    
     for (var i=0;i<this.world.numEnemies;i++)
     {
-      this.world.enemies[i].move();
-      if (!this.world.enemies[i].moveLock)
-	if (!this.world.enemies[i].hasActed)
-	  this.world.enemies[i].act(this.world);
+      if (this.world.enemies[i].alive)
+	if (!this.world.enemies[i].moveLock)
+	  if (!this.world.enemies[i].hasActed)
+	    this.world.enemies[i].act(this.world);
     }
     
     var allDone = true;
     for (var i=0;i<this.world.numEnemies;i++)
-      if (!((this.world.enemies[i].hasActed) && (!this.world.enemies[i].moveLock)))
-	allDone = false;
+      if (this.world.enemies[i].alive)
+	if (!((this.world.enemies[i].hasActed)))// && (!this.world.enemies[i].moveLock))) 	//Non-blocking version
+	//if (!((this.world.enemies[i].hasActed) && (!this.world.enemies[i].moveLock))) 		//Blocking version
+	  allDone = false;
       
     if (allDone)
     {
       for (var i=0;i<this.world.numEnemies;i++)
       {
-	this.world.enemies[i].hasActed = false;
-	this.world.enemies[i].moveLock = false;
+	if (this.world.enemies[i].alive)
+	{
+	  this.world.enemies[i].hasActed = false;
+	  this.world.enemies[i].moveLock = false;
+	}
       }
       AiTurn = false;
     }

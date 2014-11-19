@@ -5,6 +5,7 @@ function MonsterAnimal(x,y)
   this.target = {x:x,y:y};
   this.moveLock = false;
   this.hasActed = false;
+  this.alive = true;
   this.tileMoveTime = 500;
   
   this.sprite.animations.add('emright', [0,1,2,3], 12, true);
@@ -39,6 +40,7 @@ MonsterAnimal.prototype.kill = function()
 {
     this.sprite.destroy();
     this.target = {x:-1,y:-1};
+    this.alive = false;
 }
 
 MonsterAnimal.prototype.act = function(world)
