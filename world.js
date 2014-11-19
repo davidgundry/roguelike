@@ -1,19 +1,19 @@
 function World()
 {
-  this.mapSize = 5;
-  this.player = null;
-  this.map = game.add.tilemap();
-  this.layer = this.map.create('level1', this.mapSize, this.mapSize, 32, 32);
-  this.map.addTilesetImage('tileset');
-  this.heightMap = this.generateHeightMap(this.mapSize,[500,350,250,150,120,100,90,80,70,60,50,35,25,20,15,10,5],-0.9,1199,0);
-  for (var i=0;i<this.mapSize;i++)
-    for (var j=0;j<this.mapSize;j++)
-    {
-      this.heightMap[i][j] = Math.floor(this.heightMap[i][j]/100);
-      this.map.putTile(this.heightMap[i][j],i,j,this.layer);
-    }
-  this.numEnemies = 10;
-  this.enemies = [this.numEnemies];
+    this.mapSize = 5;
+    this.player = null;
+    this.map = game.add.tilemap();
+    this.layer = this.map.create('level1', this.mapSize, this.mapSize, 32, 32);
+    this.map.addTilesetImage('tileset');
+    this.heightMap = this.generateHeightMap(this.mapSize,[500,350,250,150,120,100,90,80,70,60,50,35,25,20,15,10,5],-0.9,1199,0);
+    for (var i=0;i<this.mapSize;i++)
+	for (var j=0;j<this.mapSize;j++)
+	{
+	    this.heightMap[i][j] = Math.floor(this.heightMap[i][j]/100);
+	    this.map.putTile(this.heightMap[i][j],i,j,this.layer);
+	}
+    this.numEnemies = 10;
+    this.enemies = [this.numEnemies];
 }
 
 /*
@@ -21,69 +21,69 @@ function World()
  */
 World.prototype.createEnemies = function()
 {
-  for (var i=0;i<this.numEnemies;i++)
-  {
-    this.enemies[i] = new MonsterAnimal(-1,-1);
-  }
-  
-  for (var i=0;i<this.numEnemies;i++)
-  {
-    var x,y;
-    var found = false;
-    var attempts = 0;
-    while ((!found) && (attempts < 10))
+    for (var i=0;i<this.numEnemies;i++)
     {
-      attempts++;
-      x = Math.floor(Math.random()*this.mapSize);
-      y = Math.floor(Math.random()*this.mapSize);
-      if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})) && !(this.isPlayerAt({x:x,y:y})))
-	found = true;
+	this.enemies[i] = new MonsterAnimal(-1,-1);
     }
-    if (!found)
+    
+    for (var i=0;i<this.numEnemies;i++)
     {
-      x = -1;
-      y = -1;
+	var x,y;
+	var found = false;
+	var attempts = 0;
+	while ((!found) && (attempts < 10))
+	{
+	    attempts++;
+	    x = Math.floor(Math.random()*this.mapSize);
+	    y = Math.floor(Math.random()*this.mapSize);
+	    if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})) && !(this.isPlayerAt({x:x,y:y})))
+	      found = true;
+	}
+	if (!found)
+	{
+	    x = -1;
+	    y = -1;
+	}
+	this.enemies[i].target = {x:x,y:y};
+	this.enemies[i].setSpritePosition();
+	if (!found)
+	    this.enemies[i].kill();
     }
-    this.enemies[i].target = {x:x,y:y};
-    this.enemies[i].setSpritePosition();
-    if (!found)
-      this.enemies[i].kill();
-  }
 }
 
 World.prototype.isEnemyAt = function(target)
 {
-  for (var i=0;i<this.numEnemies;i++)
-  {
-    if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
-      return true;
-  }
-  return false;
+    for (var i=0;i<this.numEnemies;i++)
+    {
+	if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
+	    return true;
+    }
+    return false;
 }
 
 World.prototype.isPlayerAt = function(target)
 {
-  return ((this.player.target.x == target.x) && (this.player.target.y == target.y));
+    return ((this.player.target.x == target.x) && (this.player.target.y == target.y));
 }
 
 World.prototype.getAt = function(target)
 {
-  for (var i=0;i<this.numEnemies;i++)
-  {
-    if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
-      return this.enemies[i];
-  }
-  return null;
+    for (var i=0;i<this.numEnemies;i++)
+    {
+	if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
+	  return this.enemies[i];
+    }
+    return null;
 }
 
 World.prototype.isValidTarget = function(target)
 {
-  if ((target.x >= 0) && (target.y >= 0) && (target.x<this.map.width) && (target.y<this.map.height))
-  {
-    if (this.heightMap[target.x][target.y]>3)
-      return true;
-  }
-  return false;
+    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.map.width) && (target.y<this.map.height))
+    {
+	if (this.heightMap[target.x][target.y]>3)
+	    return true;
+    }
+    return false;
 }
 
 World.prototype.generateHeightMap = function(regionSize,rnr,sealevel,max,min)
