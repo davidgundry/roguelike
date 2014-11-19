@@ -1,4 +1,4 @@
-function EasyMonster(x,y)
+function MonsterAnimal(x,y)
 {
   this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'characters');
   this.sprite.anchor.setTo(0.5,0.5);
@@ -20,13 +20,13 @@ function EasyMonster(x,y)
  // this.sprite.frame=42;
 }
 
-EasyMonster.prototype.setSpritePosition = function()
+MonsterAnimal.prototype.setSpritePosition = function()
 {
   this.sprite.x = this.target.x*tileWidth+tileWidth/2;
   this.sprite.y = this.target.y*tileHeight+tileHeight/2;
 }
 
-EasyMonster.prototype.move = function()
+MonsterAnimal.prototype.move = function()
 {
     if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
     {
@@ -35,13 +35,13 @@ EasyMonster.prototype.move = function()
     }
 }
 
-EasyMonster.prototype.kill = function()
+MonsterAnimal.prototype.kill = function()
 {
     this.sprite.destroy();
     this.target = {x:-1,y:-1};
 }
 
-EasyMonster.prototype.act = function(world)
+MonsterAnimal.prototype.act = function(world)
 {
   var direction = Math.floor(Math.random()*4)+1;
   var newTarget = {x:this.target.x,y:this.target.y};

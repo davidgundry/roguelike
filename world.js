@@ -23,7 +23,7 @@ World.prototype.createEnemies = function()
 {
   for (var i=0;i<this.numEnemies;i++)
   {
-    this.enemies[i] = new EasyMonster(-1,-1);
+    this.enemies[i] = new MonsterAnimal(-1,-1);
   }
   
   for (var i=0;i<this.numEnemies;i++)
