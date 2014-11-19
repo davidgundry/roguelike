@@ -1,16 +1,23 @@
 function EasyMonster(x,y)
 {
-  this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'monster');
+  this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'characters');
   this.sprite.anchor.setTo(0.5,0.5);
   this.target = {x:x,y:y};
   this.moveLock = false;
   this.hasActed = false;
   this.tileMoveTime = 500;
   
-  this.sprite.animations.add('right', [0,1,2,3], 12, true);
-  this.sprite.animations.add('left', [13,14,15,16], 12, true);
-  this.sprite.animations.add('up', [0,1,2,3], 12, true);
-  this.sprite.animations.add('down', [13,14,15,16], 12, true);
+  this.sprite.animations.add('emright', [0,1,2,3], 12, true);
+  this.sprite.animations.add('emup', [0,1,2,3], 12, true);
+  this.sprite.frame=0;
+    
+ // this.sprite.animations.add('emright', [28,29,30,31], 12, true);
+ // this.sprite.animations.add('emup', [28,29,30,31], 12, true);
+ // this.sprite.frame=28;
+  
+ // this.sprite.animations.add('emright', [42,43,44,45], 12, true);
+ // this.sprite.animations.add('emup', [42,43,44,45], 12, true);
+ // this.sprite.frame=42;
 }
 
 EasyMonster.prototype.setSpritePosition = function()
@@ -66,13 +73,25 @@ EasyMonster.prototype.act = function(world)
     this.moveLock = true;
     
      if (this.target.x*tileWidth < this.sprite.x)
-	this.sprite.animations.play('left');
+     {
+	this.sprite.animations.play('emright');
+	this.sprite.scale.x = -1;
+     }
     else if (this.target.x*tileWidth > this.sprite.x)
-	this.sprite.animations.play('right');
+    {
+	this.sprite.scale.x = 1;
+	this.sprite.animations.play('emright');
+    }
     else if (this.target.y*tileHeight > this.sprite.y)
-	this.sprite.animations.play('down');
+    {
+	this.sprite.scale.x = -1;
+	this.sprite.animations.play('emup');
+    }
     else if (this.target.y*tileHeight < this.sprite.y)
-	this.sprite.animations.play('up');
+    {
+	this.sprite.scale.x = 1;
+	this.sprite.animations.play('emup');
+    }
   } 
   this.hasActed = true;
 }

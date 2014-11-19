@@ -2,14 +2,12 @@ function Player()
 {
       this.target = {x:2,y:2};
       
-      this.sprite = game.add.sprite(this.target.x*tileWidth+tileWidth/2,this.target.y*tileHeight+tileHeight/2, 'player');
+      this.sprite = game.add.sprite(this.target.x*tileWidth+tileWidth/2,this.target.y*tileHeight+tileHeight/2, 'characters');
       game.physics.arcade.enable(this.sprite);
-      this.sprite.animations.add('right', [0,1,2], 12, true);
-      this.sprite.animations.add('left', [13,14,15], 12, true);
-      this.sprite.animations.add('up', [0,1,2], 12, true);
-      this.sprite.animations.add('down', [13,14,15], 12, true);
-      this.sprite.animations.add('attackright', [8,9,10,11], 12, false);
-      this.sprite.animations.add('attackleft', [21,22,23,24], 12, false);   
+      this.sprite.animations.add('pright', [14,15,16,17], 12, true);
+      this.sprite.animations.add('pup', [14,15,16,17], 12, true);
+      this.sprite.animations.add('pattackright', [23,24,25,26,27,14], 12, false);
+      this.sprite.frame=14;
       
       this.sprite.anchor.setTo(0.5,0.5);
 
@@ -70,9 +68,15 @@ Player.prototype.input = function(cursor,world)
 	this.hasActed = true;
 	this.animating = true;
 	if (newTarget.x > this.target.x)
-	  this.sprite.animations.play('attackright');
+	{
+	  this.sprite.scale.x = 1;
+	  this.sprite.animations.play('pattackright');
+	}
 	else
-	  this.sprite.animations.play('attackleft');
+	{
+	  this.sprite.scale.x = -1;
+	  this.sprite.animations.play('pattackright');
+	}
 	this.sprite.events.onAnimationComplete.add(function()
 	{
 	  this.animating = false;
@@ -88,13 +92,25 @@ Player.prototype.input = function(cursor,world)
 	this.hasActed = true;
 	
 	if (this.target.x*tileWidth < this.sprite.x)
-	    this.sprite.animations.play('left');
+	{
+	    this.sprite.scale.x = -1;
+	    this.sprite.animations.play('pright');
+	}
 	else if (this.target.x*tileWidth > this.sprite.x)
-	    this.sprite.animations.play('right');
+	{
+	    this.sprite.scale.x = 1;
+	    this.sprite.animations.play('pright');
+	}
 	else if (this.target.y*tileHeight > this.sprite.y)
-	    this.sprite.animations.play('down');
+	{
+	    this.sprite.scale.x = -1;
+	    this.sprite.animations.play('pup');
+	}
 	else if (this.target.y*tileHeight < this.sprite.y)
-	    this.sprite.animations.play('up');
+	{
+	    this.sprite.scale.x = 1;
+	    this.sprite.animations.play('pup');
+	}
       }     
     }
 };
