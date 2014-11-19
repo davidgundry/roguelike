@@ -8,7 +8,8 @@ function MonsterAnimal(x,y)
   this.alive = true;
   this.tileMoveTime = 500;
   
-  this.hitPoints = 10;
+  this.hitPoints = Math.floor(Math.random()*7)+7;
+  this.maxHitPoints = this.hitPoints;
   
   this.sprite.animations.add('emright', [0,1,2,3], 12, true);
   this.sprite.animations.add('emup', [0,1,2,3], 12, true);
@@ -21,6 +22,20 @@ function MonsterAnimal(x,y)
  // this.sprite.animations.add('emright', [42,43,44,45], 12, true);
  // this.sprite.animations.add('emup', [42,43,44,45], 12, true);
  // this.sprite.frame=42;
+  
+  var width = 22;
+  var height = 3;
+  
+  var bmd = game.add.bitmapData(width, height);
+  bmd.ctx.beginPath();
+  bmd.ctx.rect(0, 0, width, height);
+  bmd.ctx.fillStyle = '#ffffff';
+  bmd.ctx.fill();
+  this.hitBarDamaged = null;
+  this.hitBar = game.add.sprite(this.sprite.x+27, this.sprite.y+4, bmd);
+  this.hitBar.anchor.setTo(1, 0.5);
+  this.sprite.addChild(this.hitBar);
+  this.hitBar.visible =false;
 }
 
 MonsterAnimal.prototype.setSpritePosition = function()
@@ -48,6 +63,19 @@ MonsterAnimal.prototype.damage = function(damage)
     }
     else
     {
+      var width = 22*(this.hitPoints/this.maxHitPoints);
+      var height = 3;
+      var bmd = game.add.bitmapData(width, height);
+      bmd.ctx.beginPath();
+      bmd.ctx.rect(0, 0, width, height);
+      bmd.ctx.fillStyle = '#ff0000';
+      bmd.ctx.fill();
+      if (this.hitBarDamaged != null)
+	  this.hitBarDamaged.destroy();
+      this.hitBarDamaged = game.add.sprite(0,0, bmd);
+      this.hitBarDamaged.anchor.setTo(1, 0.5);
+      this.hitBar.addChild(this.hitBarDamaged);
+      this.hitBar.visible = true;
       return false;
     }
 }
