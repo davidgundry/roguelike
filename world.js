@@ -1,25 +1,49 @@
 function World()
 {
   this.map = game.add.tilemap();
-  this.layer = this.map.create('level1', 20, 20, 32, 32);
+  this.layer = this.map.create('level1', 10, 10, 32, 32);
   this.map.addTilesetImage('tileset');
-  this.heightMap = this.generateHeightMap(20,[50,30,10,9,8,7,6,5,4,3,3,3,3,3,3,3,3],0.1,70,0);
-  for (var i=0;i<20;i++)
-    for (var j=0;j<20;j++)
+  this.heightMap = this.generateHeightMap(10,[50,30,10,9,8,7,6,5,4,3,3,3,3,3,3,3,3],0.1,70,0);
+  for (var i=0;i<10;i++)
+    for (var j=0;j<10;j++)
     {
       this.heightMap[i][j] = Math.floor(this.heightMap[i][j]/10);
+      // TODO: quick and dirty hack
+      if (this.heightMap[i][j] == 0)
+	this.heightMap[i][j] = 3;
       this.map.putTile(this.heightMap[i][j],i,j,this.layer);
     }
-  this.enemies = [10];
-  for (var i=0;i<10;i++)
+  this.numEnemies = 10;
+  this.enemies = [this.numEnemies];
+  for (var i=0;i<this.numEnemies;i++)
   {
-    this.enemies[i] = new EasyMonster(Math.floor(Math.random()*20),Math.floor(Math.random()*20));
+    this.enemies[i] = new EasyMonster(Math.floor(Math.random()*10),Math.floor(Math.random()*10));
   }
 }
 
 World.prototype.isEnemyAt = function(target)
 {
+  for (var i=0;i<this.numEnemies;i++)
+  {
+    if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
+      return true;
+  }
   return false;
+}
+
+World.prototype.isPlayerAt = function(target)
+{
+  return false;
+}
+
+World.prototype.getAt = function(target)
+{
+  for (var i=0;i<this.numEnemies;i++)
+  {
+    if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
+      return this.enemies[i];
+  }
+  return null;
 }
 
 World.prototype.isValidTarget = function(target)

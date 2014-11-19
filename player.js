@@ -13,7 +13,8 @@ function Player()
       this.target = {x:0,y:0};
       this.moveLock = false;
       this.sprite.body.moves = false;
-      this.tileMoveTime = 250;
+      this.tileMoveTime = 300;
+      this.hasActed = false;
       
       game.camera.follow(this.sprite);
 }
@@ -24,7 +25,11 @@ Player.prototype.move = function()
     if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
     {
 	this.moveLock = false;
-	AiTurn = true;
+	if (this.hasActed)
+	{
+	  AiTurn = true;
+	  this.hasActed = false;
+	}
 	this.sprite.animations.stop();
     }
   
@@ -37,7 +42,11 @@ Player.prototype.move = function()
     else if (this.target.y*tileHeight < this.sprite.y)
 	this.sprite.animations.play('up');
 }
-  
+
+Player.prototype.attack = function(target,world)
+{
+    world.getAt(target).kill();
+}
   
 Player.prototype.input = function(cursor,world)
 {
@@ -59,7 +68,8 @@ Player.prototype.input = function(cursor,world)
     {
       if (world.isEnemyAt(target))
       {
-	
+	this.attack(target,world);
+	this.hasActed = true;
       }
       else if (world.isValidTarget(target))
       {
@@ -67,7 +77,7 @@ Player.prototype.input = function(cursor,world)
 	var t = game.add.tween(this.sprite);
       t.to({x: this.target.x*tileWidth+tileWidth/2, y:this.target.y*tileHeight+tileHeight/2}, this.tileMoveTime /*duration of the tween (in ms)*/, Phaser.Easing.Linear.None /*easing type*/, true /*autostart?*/, 0 /*delay*/, false /*yoyo?*/);
 	this.moveLock = true;
+	this.hasActed = true;
       }     
-      
     }
 };

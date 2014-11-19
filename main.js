@@ -25,13 +25,13 @@ var mainState = {
       if (!AiTurn)
       {
 	this.player.move();
-	if (!this.player.moveLock)
+	if ((!this.player.moveLock) && (!this.player.hasActed))
 	  this.player.input(this.cursor,this.world);
       }
       else
       {
 	
-	for (var i=0;i<this.world.enemies.length;i++)
+	for (var i=0;i<this.world.numEnemies;i++)
 	{
 	  this.world.enemies[i].move();
 	  if (!this.world.enemies[i].moveLock)
@@ -40,13 +40,13 @@ var mainState = {
 	}
 	
 	var allDone = true;
-	for (var i=0;i<this.world.enemies.length;i++)
+	for (var i=0;i<this.world.numEnemies;i++)
 	  if (!((this.world.enemies[i].hasActed) && (!this.world.enemies[i].moveLock)))
 	    allDone = false;
 	  
 	if (allDone)
 	{
-	  for (var i=0;i<this.world.enemies.length;i++)
+	  for (var i=0;i<this.world.numEnemies;i++)
 	  {
 	    this.world.enemies[i].hasActed = false;
 	    this.world.enemies[i].moveLock = false;
