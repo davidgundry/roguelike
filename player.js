@@ -24,6 +24,7 @@ Player.prototype.move = function()
     if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
     {
 	this.moveLock = false;
+	AiTurn = true;
 	this.sprite.animations.stop();
     }
   
@@ -56,7 +57,11 @@ Player.prototype.input = function(cursor,world)
     
     if (pressedKey)
     {
-      if (world.isValidTarget(target))
+      if (world.isEnemyAt(target))
+      {
+	
+      }
+      else if (world.isValidTarget(target))
       {
 	this.target = target;
 	var t = game.add.tween(this.sprite);
