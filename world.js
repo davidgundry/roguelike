@@ -8,3 +8,9 @@ function World()
       this.map.putTile(1,i,j,this.layer);
 }
 
+World.prototype.isValidTarget = function(target)
+{
+  if ((target.x >= 0) && (target.y >= 0) && (target.x<this.map.width) && (target.y<this.map.height))
+    return true;
+  return false;
+}

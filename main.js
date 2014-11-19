@@ -10,7 +10,7 @@ var mainState = {
       this.world = new World();
       this.player = new Player();
       game.physics.startSystem(Phaser.Physics.ARCADE);
-      game.world.setBounds(0,0,1000,1000);
+      game.world.setBounds(0,0,320,320);
 
       game.input.keyboard.addKeyCapture([Phaser.Keyboard.UP,Phaser.Keyboard.DOWN,Phaser.Keyboard.LEFT,Phaser.Keyboard.RIGHT]);
       this.cursor = game.input.keyboard.createCursorKeys();
@@ -34,6 +34,7 @@ var mainState = {
 
 var screenDimensions = {height: 300, width: 400};
 var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phaser.AUTO, 'gameDiv');
+var tileWidth = 32, tileHeight = 32;
 
 var timer = new Phaser.Timer(game,false);
 
