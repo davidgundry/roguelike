@@ -10,7 +10,7 @@ var mainState = {
       this.world = new World();
       this.player = new Player();
       game.physics.startSystem(Phaser.Physics.ARCADE);
-      game.world.setBounds(0,0,640,640);
+      game.world.setBounds(0,0,this.world.mapSize*tileWidth,this.world.mapSize*tileHeight);
 
       game.input.keyboard.addKeyCapture([Phaser.Keyboard.UP,Phaser.Keyboard.DOWN,Phaser.Keyboard.LEFT,Phaser.Keyboard.RIGHT]);
       this.cursor = game.input.keyboard.createCursorKeys();
@@ -18,10 +18,6 @@ var mainState = {
   
   update: function()
   {
-      //game.physics.arcade.collide(this.player.sprite, this.layer);
-      
-
-
       if (!AiTurn)
       {
 	this.player.move();
@@ -60,9 +56,9 @@ var mainState = {
     game.debug.text('x:' + this.player.target.x + 'y:' + this.player.target.y, 32, 32);
     
     if (AiTurn)
-      game.debug.text('AI Turn', 32, 50);
+      game.debug.text('AI Turn', 8, 12);
     else
-      game.debug.text('Player Turn', 32, 50);
+      game.debug.text('Player Turn', 8, 12);
     
   }
 
