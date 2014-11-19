@@ -8,6 +8,8 @@ function MonsterAnimal(x,y)
   this.alive = true;
   this.tileMoveTime = 500;
   
+  this.hitPoints = 10;
+  
   this.sprite.animations.add('emright', [0,1,2,3], 12, true);
   this.sprite.animations.add('emup', [0,1,2,3], 12, true);
   this.sprite.frame=0;
@@ -33,6 +35,20 @@ MonsterAnimal.prototype.move = function()
     {
 	this.moveLock = false;
 	this.sprite.animations.stop();
+    }
+}
+
+MonsterAnimal.prototype.damage = function(damage)
+{
+    this.hitPoints -= damage;
+    if (this.hitPoints<=0)
+    {
+      this.kill()
+      return true;
+    }
+    else
+    {
+      return false;
     }
 }
 

@@ -41,7 +41,7 @@ Player.prototype.move = function()
 
 Player.prototype.attack = function(attackTarget,world)
 {
-    world.getAt(attackTarget).kill();
+    world.getAt(attackTarget).damage(5);
 }
   
 Player.prototype.input = function(cursor,world)
