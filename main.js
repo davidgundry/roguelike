@@ -20,25 +20,19 @@ var mainState = {
   {
       //game.physics.arcade.collide(this.player.sprite, this.layer);
       
+      this.player.move();
+	  
       if (!this.player.moveLock)
 	this.player.input(this.cursor,this.world);
-      
-      this.player.move();
-      //this.manageEnemies();
   },
+  
+  render: function () {
+    game.debug.text('x:' + this.player.target.x + 'y:' + this.player.target.y, 32, 32);
+  }
 
-  manageEnemies: function()
-  {
-    this.bitmap.context.clearRect(0, 0, this.game.width, this.game.height);
-    
-    this.world.monsters.forEach(function(enemy)
-    {
-      enemy.behaviour.act(enemy,this.player,this.world);
-    }, this);
-  },
 };
 
-var screenDimensions = {height: 400, width: 400};
+var screenDimensions = {height: 300, width: 400};
 var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phaser.AUTO, 'gameDiv');
 
 var timer = new Phaser.Timer(game,false);

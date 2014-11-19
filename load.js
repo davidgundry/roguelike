@@ -2,7 +2,7 @@ var loadState = {
   
   preload: function()
   {
-      game.stage.backgroundColor = "#1466bb";
+      game.stage.backgroundColor = "#000000";
 	  
       var loadingLabel = game.add.text(game.world.centerX, game.world.centerY, 'Loading...', { font: '30px Arial', fill: '#ffffff'});
       loadingLabel.anchor.setTo(0.5,0.5);

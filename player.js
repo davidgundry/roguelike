@@ -1,6 +1,6 @@
 function Player()
 {
-      this.respawn = {x: 40, y: 40};
+      this.respawn = {x: 32, y: 32};
       this.sprite = game.add.sprite(this.respawn.x,this.respawn.y, 'player');
       game.physics.arcade.enable(this.sprite);
       this.sprite.animations.add('right', [0,1,2,3], 12, true);
@@ -12,6 +12,8 @@ function Player()
      
       this.target = {x:1,y:1};
       this.moveLock = false;
+      this.sprite.body.moves = false;
+      this.tileMoveTime = 250;
       
       game.camera.follow(this.sprite);
 }
@@ -19,45 +21,35 @@ function Player()
 
 Player.prototype.move = function()
 {
-    var spriteSpeed = 10;
-    var tileWidth = 32;
-    var tileHeight = 32;
-    
-    if (this.target.x*tileWidth < this.sprite.x)
+    if ((this.sprite.x == this.target.x*32) && (this.sprite.y == this.target.y*32))
     {
-      var diff = this.target.x*tileWidth - this.sprite.x;
-      this.sprite.body.velocity.x = -spriteSpeed;
+	this.sprite.body.velocity.x = 0;
+	this.sprite.body.velocity.y = 0;
+	this.moveLock = false;
     }
-    else if (this.target.x*tileWidth > this.sprite.x)
-      this.sprite.body.velocity.x = spriteSpeed;
-    else
-      this.sprite.body.velocity.x = 0;
-    
-    if (this.target.y*tileHeight < this.sprite.y)
-      this.sprite.body.velocity.y = -spriteSpeed;
-    else if (this.target.y*tileHeight > this.sprite.y)
-      this.sprite.body.velocity.y = spriteSpeed;
-    else
-      this.sprite.body.velocity.y = 0;
-      
-    if (this.sprite.body.velocity.x <0)
-      this.sprite.animations.play('left');
-    else if (this.sprite.body.velocity.x >0)
-      this.sprite.animations.play('right');
-    else if (this.sprite.body.velocity.y >0)
-      this.sprite.animations.play('down');
-    else if (this.sprite.body.velocity.y <0)
-      this.sprite.animations.play('up');
+  
+    if (this.target.x*32 < this.sprite.x)
+	this.sprite.animations.play('left');
+    else if (this.target.x*32 > this.sprite.x)
+	this.sprite.animations.play('right');
+    else if (this.target.y*32 > this.sprite.y)
+	this.sprite.animations.play('down');
+    else if (this.target.y*32 < this.sprite.y)
+	this.sprite.animations.play('up');
     else
     {
-      this.sprite.animations.stop();
-      this.moveLock = false;
+	this.sprite.animations.stop();
     }
 }
   
   
 Player.prototype.input = function(cursor,world)
 {
+    var tileWidth = 32;
+    var tileHeight = 32;
+  
+    var pressedKey = true;
+    
     if (cursor.left.isDown)
       this.target = {x:this.target.x-1,y:this.target.y};
     else if (cursor.right.isDown)
@@ -66,26 +58,14 @@ Player.prototype.input = function(cursor,world)
       this.target = {x:this.target.x,y:this.target.y-1};
     else if (cursor.down.isDown)
       this.target = {x:this.target.x,y:this.target.y+1};
-
-    this.moveLock = true;
-};
-  
-Player.prototype.die = function()
-{
-  //timer.add(1000);
-  //timer.onEvent.add(Player.spawn, this);
-  //timer.start();
-  this.dieSound.play();
-  this.dead = true;
-  this.spawn();
-
-};
-
-Player.prototype.spawn = function()
-{
-  this.sprite.body.x = this.respawn.x;
-  this.sprite.body.y = this.respawn.y;
-  this.sprite.body.velocity.x = 0;
-  this.sprite.body.velocity.y = 0;
-  this.dead = false;
+    else
+      pressedKey=false;
+    
+    if (pressedKey)
+    {
+      var t = game.add.tween(this.sprite);
+      t.to({x: this.target.x*tileWidth, y:this.target.y*tileWidth}, this.tileMoveTime /*duration of the tween (in ms)*/, Phaser.Easing.Linear.None /*easing type*/, true /*autostart?*/, 0 /*delay*/, false /*yoyo?*/);
+      
+      this.moveLock = true;
+    }
 };
