@@ -1,20 +1,23 @@
 function Player()
 {
-      this.respawn = {x: 16, y: 16};
-      this.sprite = game.add.sprite(this.respawn.x,this.respawn.y, 'player');
+      this.target = {x:2,y:2};
+      
+      this.sprite = game.add.sprite(this.target.x*tileWidth+tileWidth/2,this.target.y*tileHeight+tileHeight/2, 'player');
       game.physics.arcade.enable(this.sprite);
-      this.sprite.animations.add('right', [0,1,2,3], 12, true);
-      this.sprite.animations.add('left', [13,14,15,16], 12, true);
-      this.sprite.animations.add('up', [0,1,2,3], 12, true);
-      this.sprite.animations.add('down', [13,14,15,16], 12, true);
+      this.sprite.animations.add('right', [0,1,2], 12, true);
+      this.sprite.animations.add('left', [13,14,15], 12, true);
+      this.sprite.animations.add('up', [0,1,2], 12, true);
+      this.sprite.animations.add('down', [13,14,15], 12, true);
+      this.sprite.animations.add('attackright', [8,9,10,11], 12, false);
+      this.sprite.animations.add('attackleft', [21,22,23,24], 12, false);   
       
       this.sprite.anchor.setTo(0.5,0.5);
-     
-      this.target = {x:0,y:0};
+
       this.moveLock = false;
       this.sprite.body.moves = false;
       this.tileMoveTime = 300;
       this.hasActed = false;
+      this.animating = false;
       
       game.camera.follow(this.sprite);
 }
@@ -22,7 +25,11 @@ function Player()
 
 Player.prototype.move = function()
 {
-    if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
+    if (this.animating)
+    {
+      //this.sprite.animations.play('right');
+    }
+    else if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
     {
 	this.moveLock = false;
 	if (this.hasActed)
@@ -32,15 +39,6 @@ Player.prototype.move = function()
 	}
 	this.sprite.animations.stop();
     }
-  
-    if (this.target.x*tileWidth < this.sprite.x)
-	this.sprite.animations.play('left');
-    else if (this.target.x*tileWidth > this.sprite.x)
-	this.sprite.animations.play('right');
-    else if (this.target.y*tileHeight > this.sprite.y)
-	this.sprite.animations.play('down');
-    else if (this.target.y*tileHeight < this.sprite.y)
-	this.sprite.animations.play('up');
 }
 
 Player.prototype.attack = function(attackTarget,world)
@@ -70,6 +68,16 @@ Player.prototype.input = function(cursor,world)
       {
 	this.attack(newTarget,world);
 	this.hasActed = true;
+	this.animating = true;
+	if (newTarget.x > this.target.x)
+	  this.sprite.animations.play('attackright');
+	else
+	  this.sprite.animations.play('attackleft');
+	this.sprite.events.onAnimationComplete.add(function()
+	{
+	  this.animating = false;
+	}, this);
+
       }
       else if (world.isValidTarget(newTarget))
       {
@@ -78,6 +86,15 @@ Player.prototype.input = function(cursor,world)
       t.to({x: this.target.x*tileWidth+tileWidth/2, y:this.target.y*tileHeight+tileHeight/2}, this.tileMoveTime /*duration of the tween (in ms)*/, Phaser.Easing.Linear.None /*easing type*/, true /*autostart?*/, 0 /*delay*/, false /*yoyo?*/);
 	this.moveLock = true;
 	this.hasActed = true;
+	
+	if (this.target.x*tileWidth < this.sprite.x)
+	    this.sprite.animations.play('left');
+	else if (this.target.x*tileWidth > this.sprite.x)
+	    this.sprite.animations.play('right');
+	else if (this.target.y*tileHeight > this.sprite.y)
+	    this.sprite.animations.play('down');
+	else if (this.target.y*tileHeight < this.sprite.y)
+	    this.sprite.animations.play('up');
       }     
     }
 };

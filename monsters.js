@@ -13,6 +13,12 @@ function EasyMonster(x,y)
   this.sprite.animations.add('down', [13,14,15,16], 12, true);
 }
 
+EasyMonster.prototype.setSpritePosition = function()
+{
+  this.sprite.x = this.target.x*tileWidth+tileWidth/2;
+  this.sprite.y = this.target.y*tileHeight+tileHeight/2;
+}
+
 EasyMonster.prototype.move = function()
 {
     if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
@@ -20,15 +26,6 @@ EasyMonster.prototype.move = function()
 	this.moveLock = false;
 	this.sprite.animations.stop();
     }
-    
-    if (this.target.x*tileWidth < this.sprite.x)
-	this.sprite.animations.play('left');
-    else if (this.target.x*tileWidth > this.sprite.x)
-	this.sprite.animations.play('right');
-    else if (this.target.y*tileHeight > this.sprite.y)
-	this.sprite.animations.play('down');
-    else if (this.target.y*tileHeight < this.sprite.y)
-	this.sprite.animations.play('up');
 }
 
 EasyMonster.prototype.kill = function()
@@ -59,7 +56,7 @@ EasyMonster.prototype.act = function(world)
   }
   if (world.isPlayerAt(newTarget))
   {
-    
+      
   }
   else if ((world.isValidTarget(newTarget)) && !(world.isEnemyAt(newTarget)))
   {
@@ -67,6 +64,15 @@ EasyMonster.prototype.act = function(world)
     var t = game.add.tween(this.sprite);
     t.to({x: this.target.x*tileWidth+tileWidth/2, y:this.target.y*tileHeight+tileHeight/2}, this.tileMoveTime /*duration of the tween (in ms)*/, Phaser.Easing.Linear.None /*easing type*/, true /*autostart?*/, 0 /*delay*/, false /*yoyo?*/);
     this.moveLock = true;
+    
+     if (this.target.x*tileWidth < this.sprite.x)
+	this.sprite.animations.play('left');
+    else if (this.target.x*tileWidth > this.sprite.x)
+	this.sprite.animations.play('right');
+    else if (this.target.y*tileHeight > this.sprite.y)
+	this.sprite.animations.play('down');
+    else if (this.target.y*tileHeight < this.sprite.y)
+	this.sprite.animations.play('up');
   } 
   this.hasActed = true;
 }

@@ -9,7 +9,8 @@ var mainState = {
   {
       this.world = new World();
       this.player = new Player();
-      game.physics.startSystem(Phaser.Physics.ARCADE);
+      this.world.player = this.player;
+      this.world.createEnemies();
       game.world.setBounds(0,0,this.world.mapSize*tileWidth,this.world.mapSize*tileHeight);
 
       game.input.keyboard.addKeyCapture([Phaser.Keyboard.UP,Phaser.Keyboard.DOWN,Phaser.Keyboard.LEFT,Phaser.Keyboard.RIGHT]);
@@ -25,36 +26,36 @@ var mainState = {
 	  this.player.input(this.cursor,this.world);
       }
       else
-      {
-	
-	for (var i=0;i<this.world.numEnemies;i++)
-	{
-	  this.world.enemies[i].move();
-	  if (!this.world.enemies[i].moveLock)
-	    if (!this.world.enemies[i].hasActed)
-	      this.world.enemies[i].act(this.world);
-	}
-	
-	var allDone = true;
-	for (var i=0;i<this.world.numEnemies;i++)
-	  if (!((this.world.enemies[i].hasActed) && (!this.world.enemies[i].moveLock)))
-	    allDone = false;
-	  
-	if (allDone)
-	{
-	  for (var i=0;i<this.world.numEnemies;i++)
-	  {
-	    this.world.enemies[i].hasActed = false;
-	    this.world.enemies[i].moveLock = false;
-	  }
-	  AiTurn = false;
-	}
-      }
+	this.runAiTurn();
   },
   
-  render: function () {
-    game.debug.text('x:' + this.player.target.x + 'y:' + this.player.target.y, 32, 32);
+  runAiTurn: function()
+  {    
+    for (var i=0;i<this.world.numEnemies;i++)
+    {
+      this.world.enemies[i].move();
+      if (!this.world.enemies[i].moveLock)
+	if (!this.world.enemies[i].hasActed)
+	  this.world.enemies[i].act(this.world);
+    }
     
+    var allDone = true;
+    for (var i=0;i<this.world.numEnemies;i++)
+      if (!((this.world.enemies[i].hasActed) && (!this.world.enemies[i].moveLock)))
+	allDone = false;
+      
+    if (allDone)
+    {
+      for (var i=0;i<this.world.numEnemies;i++)
+      {
+	this.world.enemies[i].hasActed = false;
+	this.world.enemies[i].moveLock = false;
+      }
+      AiTurn = false;
+    }
+  },
+  
+  render: function () {   
     if (AiTurn)
       game.debug.text('AI Turn', 8, 12);
     else

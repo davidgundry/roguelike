@@ -1,10 +1,11 @@
 function World()
 {
-  this.mapSize = 20;
+  this.mapSize = 5;
+  this.player = null;
   this.map = game.add.tilemap();
   this.layer = this.map.create('level1', this.mapSize, this.mapSize, 32, 32);
   this.map.addTilesetImage('tileset');
-  this.heightMap = this.generateHeightMap(this.mapSize,[500,350,250,150,120,100,90,80,70,60,50,35,25,20,15,10,5],-0.3,700,0);
+  this.heightMap = this.generateHeightMap(this.mapSize,[500,350,250,150,120,100,90,80,70,60,50,35,25,20,15,10,5],-0.9,1199,0);
   for (var i=0;i<this.mapSize;i++)
     for (var j=0;j<this.mapSize;j++)
     {
@@ -13,9 +14,40 @@ function World()
     }
   this.numEnemies = 10;
   this.enemies = [this.numEnemies];
+}
+
+/*
+ * This might hang if there is not enough free space to put enemies.
+ */
+World.prototype.createEnemies = function()
+{
   for (var i=0;i<this.numEnemies;i++)
   {
-    this.enemies[i] = new EasyMonster(Math.floor(Math.random()*this.mapSize),Math.floor(Math.random()*this.mapSize));
+    this.enemies[i] = new EasyMonster(-1,-1);
+  }
+  
+  for (var i=0;i<this.numEnemies;i++)
+  {
+    var x,y;
+    var found = false;
+    var attempts = 0;
+    while ((!found) && (attempts < 10))
+    {
+      attempts++;
+      x = Math.floor(Math.random()*this.mapSize);
+      y = Math.floor(Math.random()*this.mapSize);
+      if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})) && !(this.isPlayerAt({x:x,y:y})))
+	found = true;
+    }
+    if (!found)
+    {
+      x = -1;
+      y = -1;
+    }
+    this.enemies[i].target = {x:x,y:y};
+    this.enemies[i].setSpritePosition();
+    if (!found)
+      this.enemies[i].kill();
   }
 }
 
@@ -31,7 +63,7 @@ World.prototype.isEnemyAt = function(target)
 
 World.prototype.isPlayerAt = function(target)
 {
-  return false;
+  return ((this.player.target.x == target.x) && (this.player.target.y == target.y));
 }
 
 World.prototype.getAt = function(target)
@@ -48,7 +80,7 @@ World.prototype.isValidTarget = function(target)
 {
   if ((target.x >= 0) && (target.y >= 0) && (target.x<this.map.width) && (target.y<this.map.height))
   {
-    if (this.heightMap[target.x][target.y]>1)
+    if (this.heightMap[target.x][target.y]>3)
       return true;
   }
   return false;
