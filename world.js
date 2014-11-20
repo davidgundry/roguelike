@@ -1,11 +1,11 @@
 function World()
 {
-    this.mapSize = 5;
+    this.mapSize = 32;
     this.player = null;
     this.map = game.add.tilemap();
     this.layer = this.map.create('level1', this.mapSize, this.mapSize, 32, 32);
     this.map.addTilesetImage('tileset');
-    this.heightMap = this.generateHeightMap(this.mapSize,[500,350,250,150,120,100,90,80,70,60,50,35,25,20,15,10,5],-0.9,1199,0);
+    this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-10,1199,0);
     for (var i=0;i<this.mapSize;i++)
 	for (var j=0;j<this.mapSize;j++)
 	{
