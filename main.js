@@ -75,7 +75,7 @@ var mainState = {
 };
 
 var tileWidth = 32, tileHeight = 32;
-var screenDimensions = {height: 352, width: 416};
+var screenDimensions = {height: tileHeight*9, width: tileWidth*11};
 var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phaser.AUTO, 'gameDiv');
 var AiTurn = false;
 
