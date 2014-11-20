@@ -19,7 +19,7 @@ function Player()
 
     game.camera.follow(this.sprite);
     
-    this.hitPoints = Math.floor(Math.random()*10)+20;
+    this.hitPoints = Math.floor(Math.random()*10)+10;
     this.maxHitPoints = this.hitPoints;
     this.createHitBar();
 }
@@ -35,7 +35,7 @@ Player.prototype.createHitBar = function()
     bmd.ctx.fillStyle = '#ffffff';
     bmd.ctx.fill();
     this.hitBarDamaged = null;
-    this.hitBar = game.add.sprite(this.sprite.x+16, this.sprite.y+4, bmd);
+    this.hitBar = game.add.sprite(0, -14, bmd);
     this.hitBar.anchor.setTo(0.5, 0.5);
     this.sprite.addChild(this.hitBar);
     this.hitBar.visible =false;
@@ -128,11 +128,13 @@ Player.prototype.input = function(cursor,world)
 	    if (newTarget.x > this.target.x)
 	    {
 		this.sprite.scale.x = 1;
+		this.hitBar.scale.x = 1;
 		this.sprite.animations.play('pattackright');
 	    }
 	    else
 	    {
 		this.sprite.scale.x = -1;
+		this.hitBar.scale.x = -1;
 		this.sprite.animations.play('pattackright');
 	    }
 	    this.sprite.events.onAnimationComplete.add(function()
@@ -151,21 +153,25 @@ Player.prototype.input = function(cursor,world)
 	    if (this.target.x*tileWidth < this.sprite.x)
 	    {
 		this.sprite.scale.x = -1;
+		this.hitBar.scale.x = -1;
 		this.sprite.animations.play('pright');
 	    }
 	    else if (this.target.x*tileWidth > this.sprite.x)
 	    {
 		this.sprite.scale.x = 1;
+		this.hitBar.scale.x = 1;
 		this.sprite.animations.play('pright');
 	    }
 	    else if (this.target.y*tileHeight > this.sprite.y)
 	    {
 		this.sprite.scale.x = -1;
+		this.hitBar.scale.x = -1;
 		this.sprite.animations.play('pup');
 	    }
 	    else if (this.target.y*tileHeight < this.sprite.y)
 	    {
 		this.sprite.scale.x = 1;
+		this.hitBar.scale.x = 1;
 		this.sprite.animations.play('pup');
 	    }
 	}     

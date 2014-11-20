@@ -5,6 +5,7 @@ function MonsterAnimal(x,y)
     this.target = {x:x,y:y};
     this.moveLock = false;
     this.hasActed = false;
+    this.animating = false;
     this.alive = true;
     this.tileMoveTime = 500;
     
@@ -13,6 +14,7 @@ function MonsterAnimal(x,y)
     
     this.sprite.animations.add('emright', [0,1,2,3], 12, true);
     this.sprite.animations.add('emup', [0,1,2,3], 12, true);
+    this.sprite.animations.add('emattackright', [9,10,11,12,13,0], 12, false);
     this.sprite.frame=0;
       
   // this.sprite.animations.add('emright', [28,29,30,31], 12, true);
@@ -91,7 +93,11 @@ MonsterAnimal.prototype.setSpritePosition = function()
 
 MonsterAnimal.prototype.move = function()
 {
-    if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
+    if (this.animating)
+    {
+      //this.sprite.animations.play('right');
+    }
+    else if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
     {
 	this.moveLock = false;
 	this.sprite.animations.stop();
@@ -120,7 +126,26 @@ MonsterAnimal.prototype.act = function(world)
     }
     if (world.isPlayerAt(newTarget))
     {
+	this.animating = true;
+	world.player.damage(Math.floor(Math.random(6)+1));
+	this.sprite.animations.play('emattackright');
+	this.sprite.events.onAnimationComplete.add(function()
+	{
+	    this.animating = false;
+	}, this);
 	
+	if (newTarget.x > this.target.x)
+	{
+	    this.sprite.scale.x = 1;
+	    this.hitBar.scale.x = 1;
+	    this.sprite.animations.play('emattackright');
+	}
+	else
+	{
+	    this.sprite.scale.x = -1;
+	    this.hitBar.scale.x = -1;
+	    this.sprite.animations.play('emattackright');
+	}
     }
     else if ((world.isValidTarget(newTarget)) && !(world.isEnemyAt(newTarget)))
     {
