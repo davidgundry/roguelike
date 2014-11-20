@@ -16,8 +16,10 @@ var loadState = {
 	game.load.spritesheet('potions', 'assets/potions.png',25,25);
 	game.load.image('tileset', 'assets/tileset.png');
 	
-      // game.load.audio('jump','assets/jump.wav');
-      // game.load.audio('die','assets/die.wav');
+	game.load.audio('coin','assets/coin.wav');
+	game.load.audio('hurt','assets/hurt.wav');
+	game.load.audio('attack','assets/attack.wav');
+	game.load.audio('potion','assets/potion.wav');
     },
     
     create: function()

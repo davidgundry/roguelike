@@ -1,35 +1,11 @@
-function MonsterAnimal(x,y,world)
+function Monster(x,y,world)
 {
-    this.world = world;
-    this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'characters');
-    this.sprite.anchor.setTo(0.5,0.5);
-    this.target = {x:x,y:y};
-    this.moveLock = false;
-    this.hasActed = false;
-    this.animating = false;
-    this.alive = true;
-    this.tileMoveTime = 500;
-    
-    this.hitPoints = Math.floor(Math.random()*7)+7;
-    this.maxHitPoints = this.hitPoints;
-    
-    this.sprite.animations.add('emright', [0,1,2,3], 12, true);
-    this.sprite.animations.add('emup', [0,1,2,3], 12, true);
-    this.sprite.animations.add('emattackright', [9,10,11,12,13,0], 12, false);
-    this.sprite.frame=0;
-      
-  // this.sprite.animations.add('emright', [28,29,30,31], 12, true);
-  // this.sprite.animations.add('emup', [28,29,30,31], 12, true);
-  // this.sprite.frame=28;
-    
-  // this.sprite.animations.add('emright', [42,43,44,45], 12, true);
-  // this.sprite.animations.add('emup', [42,43,44,45], 12, true);
-  // this.sprite.frame=42;
-    
-    this.createHitBar();
 }
 
-MonsterAnimal.prototype.createHitBar = function()
+Monster.prototype.dropLoot = function(){}
+Monster.prototype.act = function(){this.hasActed = true;}
+
+Monster.prototype.createHitBar = function()
 {
     var width = 22;
     var height = 3;
@@ -47,7 +23,7 @@ MonsterAnimal.prototype.createHitBar = function()
     this.hitBar.alpha = 0.7;
 }
 
-MonsterAnimal.prototype.updateHitBar = function()
+Monster.prototype.updateHitBar = function()
 {
     var width = 22*(this.hitPoints/this.maxHitPoints);
     var height = 3;
@@ -64,7 +40,7 @@ MonsterAnimal.prototype.updateHitBar = function()
     this.hitBar.visible = true;
 }
 
-MonsterAnimal.prototype.damage = function(damage)
+Monster.prototype.damage = function(damage)
 {
     this.hitPoints -= damage;
     if (this.hitPoints<=0)
@@ -79,21 +55,21 @@ MonsterAnimal.prototype.damage = function(damage)
     }
 }
 
-MonsterAnimal.prototype.kill = function()
+Monster.prototype.kill = function()
 {
-    this.world.addLoot(new Potion(this.target.x,this.target.y));
+    this.dropLoot();
     this.sprite.destroy();
     this.target = {x:-1,y:-1};
     this.alive = false;
 }
 
-MonsterAnimal.prototype.setSpritePosition = function()
+Monster.prototype.setSpritePosition = function()
 {
     this.sprite.x = this.target.x*tileWidth+tileWidth/2;
     this.sprite.y = this.target.y*tileHeight+tileHeight/2;
 }
 
-MonsterAnimal.prototype.move = function()
+Monster.prototype.move = function()
 {
     if (this.animating)
     {
@@ -106,9 +82,8 @@ MonsterAnimal.prototype.move = function()
     }
 }
 
-MonsterAnimal.prototype.act = function(world)
+Monster.prototype.moveAction = function(world,direction)
 {
-    var direction = Math.floor(Math.random()*4)+1;
     var newTarget = {x:this.target.x,y:this.target.y};
     if (direction == 1)
     {
@@ -182,4 +157,169 @@ MonsterAnimal.prototype.act = function(world)
 	}
     } 
     this.hasActed = true;
+}
+
+
+MonsterAnimal.prototype = new Monster();
+MonsterAnimal.prototype.constructor=MonsterAnimal;
+function MonsterAnimal(x,y,world)
+{
+    this.world = world;
+    this.target = {x:x,y:y};
+    this.moveLock = false;
+    this.hasActed = false;
+    this.animating = false;
+    this.alive = true;
+    this.tileMoveTime = 300;
+
+    this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'characters');
+    this.sprite.anchor.setTo(0.5,0.5);
+
+    
+    this.hitPoints = Math.floor(Math.random()*6)+1  +  Math.floor(Math.random()*6)+1;  //2d6
+    this.maxHitPoints = this.hitPoints;
+    
+  //  this.sprite.animations.add('emright', [0,1,2,3], 12, true);
+  //  this.sprite.animations.add('emup', [0,1,2,3], 12, true);
+  //  this.sprite.animations.add('emattackright', [9,10,11,12,13,0], 12, false);
+  //  this.sprite.frame=0;
+      
+
+   this.sprite.animations.add('emright', [42,43,44,45], 12, true);
+   this.sprite.animations.add('emup', [42,43,44,45], 12, true);
+   this.sprite.frame=42;
+    
+   this.createHitBar();
+}
+
+MonsterAnimal.prototype.dropLoot = function()
+{
+    if (Math.random()>0.9)
+	this.world.addLoot(new Potion(this.target.x,this.target.y));
+    else
+	this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
+}
+
+MonsterAnimal.prototype.act = function(world)
+{
+    var direction = Math.floor(Math.random()*5)+1;
+    this.moveAction(world,direction);
+}
+
+
+MonsterGolem.prototype = new Monster();
+MonsterGolem.prototype.constructor=MonsterAnimal;
+function MonsterGolem(x,y,world)
+{
+    this.world = world;
+    this.target = {x:x,y:y};
+    this.moveLock = false;
+    this.hasActed = false;
+    this.animating = false;
+    this.alive = true;
+    this.tileMoveTime = 300;
+
+    this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'characters');
+    this.sprite.anchor.setTo(0.5,0.5);
+    
+    this.hitPoints = Math.floor(Math.random()*10)+1  +  Math.floor(Math.random()*10)+1  + 4;  //2d10+4
+    this.maxHitPoints = this.hitPoints;
+    
+    this.sprite.animations.add('emright', [0,1,2,3], 12, true);
+    this.sprite.animations.add('emup', [0,1,2,3], 12, true);
+    this.sprite.animations.add('emattackright', [9,10,11,12,13,0], 12, false);
+    this.sprite.frame=0;
+    
+   this.createHitBar();
+}
+
+MonsterGolem.prototype.dropLoot = function()
+{
+    if (Math.random()>0.6)
+	this.world.addLoot(new Potion(this.target.x,this.target.y));
+    else
+	this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
+}
+
+MonsterGolem.prototype.act = function(world)
+{
+    var direction = 0;
+    var xdiff = (world.player.target.x - this.target.x);
+    var ydiff = (world.player.target.y - this.target.y);
+    if (Math.abs(xdiff) >= Math.abs(ydiff))
+    {
+	if (xdiff > 0)
+	    direction = 2;
+	else
+	    direction = 4;
+    }
+    else
+    {
+       	if (ydiff > 0)
+	    direction = 3;
+	else
+	    direction = 1;
+    }
+    
+    this.moveAction(world,direction);
+}
+
+
+
+
+MonsterBandit.prototype = new Monster();
+MonsterBandit.prototype.constructor=MonsterAnimal;
+function MonsterBandit(x,y,world)
+{
+    this.world = world;
+    this.target = {x:x,y:y};
+    this.moveLock = false;
+    this.hasActed = false;
+    this.animating = false;
+    this.alive = true;
+    this.tileMoveTime = 300;
+
+    this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'characters');
+    this.sprite.anchor.setTo(0.5,0.5);
+    
+    this.hitPoints = Math.floor(Math.random()*8)+1  +  Math.floor(Math.random()*8)+1  + 4;  //2d8+4
+    this.maxHitPoints = this.hitPoints;
+    
+   this.sprite.animations.add('emright', [28,29,30,31], 12, true);
+   this.sprite.animations.add('emup', [28,29,30,31], 12, true);
+   this.sprite.frame=28;
+    
+    
+   this.createHitBar();
+}
+
+MonsterBandit.prototype.dropLoot = function()
+{
+    if (Math.random()>0.3)
+	this.world.addLoot(new Potion(this.target.x,this.target.y));
+    else
+	this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
+}
+
+MonsterBandit.prototype.act = function(world)
+{
+    var direction = 0;
+    var xdiff = (world.player.target.x - this.target.x);
+    var ydiff = (world.player.target.y - this.target.y);
+    if (Math.abs(xdiff) >= Math.abs(ydiff))
+    {
+	if (xdiff > 0)
+	    direction = 2;
+	else
+	    direction = 4;
+    }
+    else
+    {
+       	if (ydiff > 0)
+	    direction = 3;
+	else
+	    direction = 1;
+    }
+    
+    this.moveAction(world,direction);
 }

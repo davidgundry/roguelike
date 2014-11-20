@@ -64,7 +64,12 @@ World.prototype.createEnemies = function()
 {
     for (var i=0;i<this.numEnemies;i++)
     {
-	this.enemies[i] = new MonsterAnimal(-1,-1,this);
+	if (Math.random() > 0.9)
+	  this.enemies[i] = new MonsterBandit(-1,-1,this);
+	else if (Math.random() > 0.8)
+	  this.enemies[i] = new MonsterGolem(-1,-1,this);
+	else
+	  this.enemies[i] = new MonsterAnimal(-1,-1,this);
     }
     
     for (var i=0;i<this.numEnemies;i++)

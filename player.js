@@ -68,6 +68,9 @@ Player.prototype.updateHitBar = function()
 Player.prototype.damage = function(damage)
 {
     this.hitPoints -= damage;
+    var hurt = game.add.audio('hurt');
+    hurt.play();
+    
     if (this.hitPoints<=0)
     {
 	this.kill()
@@ -105,7 +108,7 @@ Player.prototype.move = function()
 
 Player.prototype.attack = function(attackTarget,world)
 {
-    world.getAt(attackTarget).damage(Math.floor(Math.random()*6+1));
+    world.getAt(attackTarget).damage(Math.floor(Math.random()*8+1+2)); //1d8+2
 }
   
 Player.prototype.input = function(cursor,world)
@@ -147,6 +150,8 @@ Player.prototype.input = function(cursor,world)
 	    {
 		this.animating = false;
 	    }, this);
+	    var attackSound = game.add.audio('attack');
+	    attackSound.play();
 	}
 	else if (world.isValidTarget(newTarget))
 	{
