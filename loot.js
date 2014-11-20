@@ -13,4 +13,5 @@ function Loot(x,y)
 Loot.prototype.kill = function()
 {
     this.sprite.destroy();
+    this.target = {x:-1,y:-1};
 }
