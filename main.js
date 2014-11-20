@@ -69,6 +69,7 @@ var mainState = {
 	    game.debug.text('AI Turn', 8, 12);
 	else
 	    game.debug.text('Player Turn', 8, 12);
+	game.debug.text(this.player.coins, 120, 12);
       
     }
 };

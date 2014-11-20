@@ -22,6 +22,8 @@ function Player()
     this.hitPoints = Math.floor(Math.random()*10)+10;
     this.maxHitPoints = this.hitPoints;
     this.createHitBar();
+    
+    this.coins = 0;
 }
   
 Player.prototype.createHitBar = function()
@@ -149,6 +151,11 @@ Player.prototype.input = function(cursor,world)
 	  t.to({x: this.target.x*tileWidth+tileWidth/2, y:this.target.y*tileHeight+tileHeight/2}, this.tileMoveTime /*duration of the tween (in ms)*/, Phaser.Easing.Linear.None /*easing type*/, true /*autostart?*/, 0 /*delay*/, false /*yoyo?*/);
 	    this.moveLock = true;
 	    this.hasActed = true;
+	    
+	    if (world.isLootAt(newTarget))
+	    {
+		world.killLootAt(newTarget);
+	    }
 	    
 	    if (this.target.x*tileWidth < this.sprite.x)
 	    {

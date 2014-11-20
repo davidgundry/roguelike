@@ -12,6 +12,7 @@ var loadState = {
 	game.load.setPreloadSprite(progressBar);
 	  
 	game.load.spritesheet('characters', 'assets/characters.png',32,32);
+	game.load.spritesheet('loot', 'assets/loot.png',32,32);
 	game.load.image('tileset', 'assets/tileset.png');
 	
       // game.load.audio('jump','assets/jump.wav');

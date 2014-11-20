@@ -14,6 +14,34 @@ function World()
 	}
     this.numEnemies = 10;
     this.enemies = [this.numEnemies];
+    this.loot = [];
+}
+
+World.prototype.addLoot = function(item)
+{
+    this.loot.push(item);
+}
+
+World.prototype.isLootAt = function(target)
+{
+    for (var i=0;i<this.loot.length;i++)
+    {
+	if ((this.loot[i].target.x == target.x) && (this.loot[i].target.y == target.y))
+	    return true;
+    }
+    return false;
+}
+
+World.prototype.killLootAt = function(target)
+{
+    for (var i=0;i<this.loot.length;i++)
+    {
+	if ((this.loot[i].target.x == target.x) && (this.loot[i].target.y == target.y))
+	{
+	    this.player.coins++;
+	    this.loot[i].kill();
+	}
+    }
 }
 
 /*
@@ -23,7 +51,7 @@ World.prototype.createEnemies = function()
 {
     for (var i=0;i<this.numEnemies;i++)
     {
-	this.enemies[i] = new MonsterAnimal(-1,-1);
+	this.enemies[i] = new MonsterAnimal(-1,-1,this);
     }
     
     for (var i=0;i<this.numEnemies;i++)

@@ -1,5 +1,6 @@
-function MonsterAnimal(x,y)
+function MonsterAnimal(x,y,world)
 {
+    this.world = world;
     this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'characters');
     this.sprite.anchor.setTo(0.5,0.5);
     this.target = {x:x,y:y};
@@ -80,6 +81,7 @@ MonsterAnimal.prototype.damage = function(damage)
 
 MonsterAnimal.prototype.kill = function()
 {
+    this.world.addLoot(new Loot(this.target.x,this.target.y));
     this.sprite.destroy();
     this.target = {x:-1,y:-1};
     this.alive = false;
