@@ -1,11 +1,23 @@
 function World()
 {
-    this.mapSize = 32;
+    var testing = true;
+    
     this.player = null;
     this.map = game.add.tilemap();
+
+    if (testing)
+    {
+      this.mapSize = 8;
+      this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-3,1199,0);
+    }
+    else
+    {
+      this.mapSize = 32;
+      this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-15,1199,0);
+    }
     this.layer = this.map.create('level1', this.mapSize, this.mapSize, 32, 32);
     this.map.addTilesetImage('tileset');
-    this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-10,1199,0);
+    
     for (var i=0;i<this.mapSize;i++)
 	for (var j=0;j<this.mapSize;j++)
 	{
@@ -32,16 +44,17 @@ World.prototype.isLootAt = function(target)
     return false;
 }
 
-World.prototype.killLootAt = function(target)
+World.prototype.getLootAt = function(target)
 {
+    var foundLoot= [];
     for (var i=0;i<this.loot.length;i++)
     {
 	if ((this.loot[i].target.x == target.x) && (this.loot[i].target.y == target.y))
 	{
-	    this.player.coins++;
-	    this.loot[i].kill();
+	    foundLoot.push( this.loot[i]);
 	}
     }
+    return foundLoot;
 }
 
 /*

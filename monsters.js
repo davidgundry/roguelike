@@ -81,7 +81,7 @@ MonsterAnimal.prototype.damage = function(damage)
 
 MonsterAnimal.prototype.kill = function()
 {
-    this.world.addLoot(new Loot(this.target.x,this.target.y));
+    this.world.addLoot(new Potion(this.target.x,this.target.y));
     this.sprite.destroy();
     this.target = {x:-1,y:-1};
     this.alive = false;

@@ -15,3 +15,31 @@ Loot.prototype.kill = function()
     this.sprite.destroy();
     this.target = {x:-1,y:-1};
 }
+
+Loot.prototype.pickedUp = function(player)
+{
+    this.kill();
+}
+
+function Potion(x,y)
+{
+  this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'potions');
+  this.sprite.anchor.setTo(0.5,0.5);
+  this.target = {x:x,y:y};
+  this.sprite.frame=Math.floor(Math.random()*60);
+}
+
+Potion.prototype.kill = function()
+{
+    this.sprite.destroy();
+    this.target = {x:-1,y:-1};
+}
+
+Potion.prototype.pickedUp = function(player)
+{
+    player.hitPoints += 10;
+    if (player.hitPoints > player.maxHitPoints)
+      player.hitPoints = player.maxHitPoints;
+    player.updateHitBar();
+    this.kill();
+}

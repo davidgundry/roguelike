@@ -58,7 +58,11 @@ Player.prototype.updateHitBar = function()
     this.hitBarDamaged = game.add.sprite(-11,0, bmd);
     this.hitBarDamaged.anchor.setTo(0, 0.5);
     this.hitBar.addChild(this.hitBarDamaged);
-    this.hitBar.visible = true;
+    
+    if (this.hitPoints < this.maxHitPoints)
+      this.hitBar.visible = true;
+    else
+       this.hitBar.visible = false;
 }
 
 Player.prototype.damage = function(damage)
@@ -154,7 +158,9 @@ Player.prototype.input = function(cursor,world)
 	    
 	    if (world.isLootAt(newTarget))
 	    {
-		world.killLootAt(newTarget);
+		var loot = world.getLootAt(newTarget);
+		for (var i=0;i<loot.length;i++)
+		  loot[i].pickedUp(this);
 	    }
 	    
 	    if (this.target.x*tileWidth < this.sprite.x)
