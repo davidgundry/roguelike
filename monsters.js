@@ -32,8 +32,8 @@ function MonsterAnimal(x,y)
     bmd.ctx.fillStyle = '#ffffff';
     bmd.ctx.fill();
     this.hitBarDamaged = null;
-    this.hitBar = game.add.sprite(this.sprite.x+27, this.sprite.y+4, bmd);
-    this.hitBar.anchor.setTo(1, 0.5);
+    this.hitBar = game.add.sprite(this.sprite.x+16, this.sprite.y+4, bmd);
+    this.hitBar.anchor.setTo(0.5, 0.5);
     this.sprite.addChild(this.hitBar);
     this.hitBar.visible =false;
     this.hitBar.alpha = 0.7;
@@ -73,8 +73,8 @@ MonsterAnimal.prototype.damage = function(damage)
 	bmd.ctx.fill();
 	if (this.hitBarDamaged != null)
 	    this.hitBarDamaged.destroy();
-	this.hitBarDamaged = game.add.sprite(0,0, bmd);
-	this.hitBarDamaged.anchor.setTo(1, 0.5);
+	this.hitBarDamaged = game.add.sprite(-11,0, bmd);
+	this.hitBarDamaged.anchor.setTo(0, 0.5);
 	this.hitBar.addChild(this.hitBarDamaged);
 	this.hitBar.visible = true;
 	return false;
@@ -123,20 +123,24 @@ MonsterAnimal.prototype.act = function(world)
 	{
 	    this.sprite.animations.play('emright');
 	    this.sprite.scale.x = -1;
+	    this.hitBar.scale.x = -1;
 	}
 	else if (this.target.x*tileWidth > this.sprite.x)
 	{
 	    this.sprite.scale.x = 1;
+	    this.hitBar.scale.x = 1;
 	    this.sprite.animations.play('emright');
 	}
 	else if (this.target.y*tileHeight > this.sprite.y)
 	{
 	    this.sprite.scale.x = -1;
+	    this.hitBar.scale.x = -1;
 	    this.sprite.animations.play('emup');
 	}
 	else if (this.target.y*tileHeight < this.sprite.y)
 	{
 	    this.sprite.scale.x = 1;
+	    this.hitBar.scale.x = 1;
 	    this.sprite.animations.play('emup');
 	}
     } 
