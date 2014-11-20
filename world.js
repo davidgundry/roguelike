@@ -81,6 +81,7 @@ World.prototype.isValidTarget = function(target)
     if ((target.x >= 0) && (target.y >= 0) && (target.x<this.map.width) && (target.y<this.map.height))
     {
 	if (this.heightMap[target.x][target.y]>3)
+	  if (this.heightMap[target.x][target.y]<10)
 	    return true;
     }
     return false;
