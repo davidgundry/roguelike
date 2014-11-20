@@ -18,8 +18,66 @@ function Player()
     this.animating = false;
 
     game.camera.follow(this.sprite);
+    
+    this.hitPoints = Math.floor(Math.random()*10)+20;
+    this.maxHitPoints = this.hitPoints;
+    this.createHitBar();
 }
   
+Player.prototype.createHitBar = function()
+{
+    var width = 22;
+    var height = 3;
+    
+    var bmd = game.add.bitmapData(width, height);
+    bmd.ctx.beginPath();
+    bmd.ctx.rect(0, 0, width, height);
+    bmd.ctx.fillStyle = '#ffffff';
+    bmd.ctx.fill();
+    this.hitBarDamaged = null;
+    this.hitBar = game.add.sprite(this.sprite.x+16, this.sprite.y+4, bmd);
+    this.hitBar.anchor.setTo(0.5, 0.5);
+    this.sprite.addChild(this.hitBar);
+    this.hitBar.visible =false;
+    this.hitBar.alpha = 0.7;
+}
+
+Player.prototype.updateHitBar = function()
+{
+    var width = 22*(this.hitPoints/this.maxHitPoints);
+    var height = 3;
+    var bmd = game.add.bitmapData(width, height);
+    bmd.ctx.beginPath();
+    bmd.ctx.rect(0, 0, width, height);
+    bmd.ctx.fillStyle = '#ff0000';
+    bmd.ctx.fill();
+    if (this.hitBarDamaged != null)
+	this.hitBarDamaged.destroy();
+    this.hitBarDamaged = game.add.sprite(-11,0, bmd);
+    this.hitBarDamaged.anchor.setTo(0, 0.5);
+    this.hitBar.addChild(this.hitBarDamaged);
+    this.hitBar.visible = true;
+}
+
+Player.prototype.damage = function(damage)
+{
+    this.hitPoints -= damage;
+    if (this.hitPoints<=0)
+    {
+	this.kill()
+	return true;
+    }
+    else
+    {
+	this.updateHitBar();
+	return false;
+    }
+}
+  
+Player.prototype.kill = function()
+{
+ //TODO: stub 
+}
 
 Player.prototype.move = function()
 {

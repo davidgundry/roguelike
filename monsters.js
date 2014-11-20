@@ -23,6 +23,11 @@ function MonsterAnimal(x,y)
   // this.sprite.animations.add('emup', [42,43,44,45], 12, true);
   // this.sprite.frame=42;
     
+    this.createHitBar();
+}
+
+MonsterAnimal.prototype.createHitBar = function()
+{
     var width = 22;
     var height = 3;
     
@@ -39,6 +44,45 @@ function MonsterAnimal(x,y)
     this.hitBar.alpha = 0.7;
 }
 
+MonsterAnimal.prototype.updateHitBar = function()
+{
+    var width = 22*(this.hitPoints/this.maxHitPoints);
+    var height = 3;
+    var bmd = game.add.bitmapData(width, height);
+    bmd.ctx.beginPath();
+    bmd.ctx.rect(0, 0, width, height);
+    bmd.ctx.fillStyle = '#ff0000';
+    bmd.ctx.fill();
+    if (this.hitBarDamaged != null)
+	this.hitBarDamaged.destroy();
+    this.hitBarDamaged = game.add.sprite(-11,0, bmd);
+    this.hitBarDamaged.anchor.setTo(0, 0.5);
+    this.hitBar.addChild(this.hitBarDamaged);
+    this.hitBar.visible = true;
+}
+
+MonsterAnimal.prototype.damage = function(damage)
+{
+    this.hitPoints -= damage;
+    if (this.hitPoints<=0)
+    {
+	this.kill()
+	return true;
+    }
+    else
+    {
+	this.updateHitBar();
+	return false;
+    }
+}
+
+MonsterAnimal.prototype.kill = function()
+{
+    this.sprite.destroy();
+    this.target = {x:-1,y:-1};
+    this.alive = false;
+}
+
 MonsterAnimal.prototype.setSpritePosition = function()
 {
     this.sprite.x = this.target.x*tileWidth+tileWidth/2;
@@ -52,40 +96,6 @@ MonsterAnimal.prototype.move = function()
 	this.moveLock = false;
 	this.sprite.animations.stop();
     }
-}
-
-MonsterAnimal.prototype.damage = function(damage)
-{
-    this.hitPoints -= damage;
-    if (this.hitPoints<=0)
-    {
-	this.kill()
-	return true;
-    }
-    else
-    {
-	var width = 22*(this.hitPoints/this.maxHitPoints);
-	var height = 3;
-	var bmd = game.add.bitmapData(width, height);
-	bmd.ctx.beginPath();
-	bmd.ctx.rect(0, 0, width, height);
-	bmd.ctx.fillStyle = '#ff0000';
-	bmd.ctx.fill();
-	if (this.hitBarDamaged != null)
-	    this.hitBarDamaged.destroy();
-	this.hitBarDamaged = game.add.sprite(-11,0, bmd);
-	this.hitBarDamaged.anchor.setTo(0, 0.5);
-	this.hitBar.addChild(this.hitBarDamaged);
-	this.hitBar.visible = true;
-	return false;
-    }
-}
-
-MonsterAnimal.prototype.kill = function()
-{
-    this.sprite.destroy();
-    this.target = {x:-1,y:-1};
-    this.alive = false;
 }
 
 MonsterAnimal.prototype.act = function(world)
