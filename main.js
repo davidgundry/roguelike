@@ -26,7 +26,7 @@ var mainState = {
 	if (!AiTurn)
 	{
 	    this.player.move();
-	    if ((!this.player.moveLock) && (!this.player.hasActed))
+	    if ((!this.player.moveLock) && (!this.player.hasActed)  && (!this.player.animating))
 		this.player.input(this.cursor,this.world);
 	}
 	else
@@ -75,7 +75,7 @@ var mainState = {
 };
 
 var tileWidth = 32, tileHeight = 32;
-var screenDimensions = {height: tileHeight*9, width: tileWidth*11};
+var screenDimensions = {height: tileHeight*17, width: tileWidth*17};
 var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phaser.AUTO, 'gameDiv');
 var AiTurn = false;
 

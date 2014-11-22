@@ -1,6 +1,6 @@
 function Player()
 {
-    this.target = {x:2,y:2};
+    this.target = {x:10,y:10};
 
     this.sprite = game.add.sprite(this.target.x*tileWidth+tileWidth/2,this.target.y*tileHeight+tileHeight/2, 'characters');
     game.physics.arcade.enable(this.sprite);
@@ -90,6 +90,12 @@ Player.prototype.kill = function()
 
 Player.prototype.move = function()
 {
+    // no blocking on player:
+    if (this.hasActed)
+    {
+	AiTurn = true;
+	this.hasActed = false;
+    }
     if (this.animating)
     {
       //this.sprite.animations.play('right');

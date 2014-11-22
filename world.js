@@ -1,6 +1,6 @@
 function World()
 {
-    var testing = true;
+    var testing = false;
     
     this.player = null;
     this.map = game.add.tilemap();
@@ -12,8 +12,8 @@ function World()
     }
     else
     {
-      this.mapSize = 32;
-      this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-15,1199,0);
+      this.mapSize = 20;
+      this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-1,1199,0);
     }
     this.layer = this.map.create('level1', this.mapSize, this.mapSize, 32, 32);
     this.map.addTilesetImage('tileset');
