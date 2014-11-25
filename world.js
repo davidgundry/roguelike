@@ -4,7 +4,7 @@ function World()
     
     this.mapSize=20;
    
-    this.heightMap = this.generateHeightMap(this.mapSize,[1200,1000,600,400,400,400,400,4000,4000,4000,1000,1000,1000,100,100,1],-0.5,1199,0);
+    this.heightMap = this.generateHeightMap(this.mapSize,[400,400,300,300,300,170,40,1,1,1,1,1,1,1,1,1],-2.5,1199,0);
 
     this.regionX = 0;
     this.regionY = 0;
