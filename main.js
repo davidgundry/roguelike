@@ -18,6 +18,13 @@ var mainState = {
 
     update: function()
     {
+	if (loopCounter == 50)
+	{
+	  this.world.createMinimap();
+	  loopCounter = 0;
+	}
+	else
+	  loopCounter++;
 	for (var i=0;i<this.world.numEnemies;i++)
 	    if (this.world.enemies[i].alive)
 		this.world.enemies[i].move();
@@ -79,6 +86,7 @@ var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phase
 var AiTurn = false;
 
 var timer = new Phaser.Timer(game,false);
+var loopCounter = 0;
 
 game.state.add('preload', preloadState);
 game.state.add('load', loadState);

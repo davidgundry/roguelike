@@ -10,8 +10,7 @@ function World()
     this.regionY = 0;
     
     this.configureCurrentRegion();
-    
-    //this.createMinimap();
+
 }
 
 World.prototype.configureCurrentRegion = function()
@@ -120,14 +119,32 @@ World.prototype.isOffRegionBottom = function(target)
 
 World.prototype.createMinimap = function()
 {    
-    this.minilayer = this.map.create('minilayer', this.mapSize, this.mapSize, 2, 2);
-    this.map.addTilesetImage('minitileset');
+    //this.minilayer = this.map.create('minilayer', this.mapSize, this.mapSize, 2, 2);
+    //this.map.addTilesetImage('minitileset');
     var bmd = game.add.bitmapData(160, 160);
+    bmd.ctx.beginPath();
+    bmd.ctx.rect(0, 0, 160, 160);
+    bmd.ctx.fillStyle = '#ff0000';
+    bmd.ctx.fill();
     for (var i=0;i<this.mapSize*4;i++)
 	for (var j=0;j<this.mapSize*4;j++)
 	{
-	  bmd.draw(this.minilayer,i*2+540,j*2,2,2);
+	  var index = this.heightMap[i][j];
+	  if (this.enemies != null)
+	  {
+	    for (var k=0;k<this.enemies.length;k++)
+	      if ((this.enemies[k].target.x == i) && (this.enemies[k].target.y == j))
+		 index = 27;
+	  }
+	  if (this.player != null)
+	    if ((this.player.target.x == i) && (this.player.target.y == j))
+	      index = 26;
+	  bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,i*2,j*2,2,2);
 	}
+    if (this.minimap != null)
+      this.minimap.destroy();
+    this.minimap = game.add.sprite(545,0, bmd);
+    this.minimap.anchor.setTo(0,0);
 }
 
 World.prototype.addLoot = function(item)
