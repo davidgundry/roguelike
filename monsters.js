@@ -194,10 +194,7 @@ function MonsterAnimal(x,y,world)
 
 MonsterAnimal.prototype.dropLoot = function()
 {
-    if (Math.random()>0.9)
-	this.world.addLoot(new Potion(this.target.x,this.target.y));
-    else
-	this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
+    this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
 }
 
 MonsterAnimal.prototype.act = function(world)
@@ -295,7 +292,7 @@ function MonsterBandit(x,y,world)
 
 MonsterBandit.prototype.dropLoot = function()
 {
-    if (Math.random()>0.3)
+    if (Math.random()>0.5)
 	this.world.addLoot(new Potion(this.target.x,this.target.y));
     else
 	this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));

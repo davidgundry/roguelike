@@ -21,7 +21,14 @@ function Potion(x,y)
   this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'potions');
   this.sprite.anchor.setTo(0.5,0.5);
   this.target = {x:x,y:y};
-  this.sprite.frame=Math.floor(Math.random()*60);
+  
+  var r = Math.floor(Math.random()*3);
+  if (r==0)
+    this.sprite.frame=10;
+  else if (r==1)
+    this.sprite.frame=41;
+  else 
+    this.sprite.frame=47;
 }
 
 

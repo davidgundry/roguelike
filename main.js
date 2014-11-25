@@ -10,7 +10,6 @@ var mainState = {
 	this.world = new World();
 	this.player = new Player();
 	this.world.player = this.player;
-	this.world.createEnemies();
 	game.world.setBounds(0,0,this.world.mapSize*tileWidth,this.world.mapSize*tileHeight);
 
 	game.input.keyboard.addKeyCapture([Phaser.Keyboard.UP,Phaser.Keyboard.DOWN,Phaser.Keyboard.LEFT,Phaser.Keyboard.RIGHT]);
@@ -75,7 +74,7 @@ var mainState = {
 };
 
 var tileWidth = 32, tileHeight = 32;
-var screenDimensions = {height: tileHeight*17, width: tileWidth*17};
+var screenDimensions = {height: tileHeight*17, width: tileWidth*17+160};
 var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phaser.AUTO, 'gameDiv');
 var AiTurn = false;
 

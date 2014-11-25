@@ -15,6 +15,7 @@ var loadState = {
 	game.load.spritesheet('loot', 'assets/loot.png',32,32);
 	game.load.spritesheet('potions', 'assets/potions.png',25,25);
 	game.load.image('tileset', 'assets/tileset.png');
+	game.load.image('minitileset', 'assets/minitileset.png');
 	
 	game.load.audio('coin','assets/coin.wav');
 	game.load.audio('hurt','assets/hurt.wav');

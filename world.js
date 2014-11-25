@@ -1,32 +1,133 @@
 function World()
 {
-    var testing = false;
-    
     this.player = null;
-    this.map = game.add.tilemap();
+    
+    this.mapSize=20;
+   
+    this.heightMap = this.generateHeightMap(this.mapSize,[1200,1000,600,400,400,400,400,4000,4000,4000,1000,1000,1000,100,100,1],-0.5,1199,0);
 
-    if (testing)
+    this.regionX = 0;
+    this.regionY = 0;
+    
+    this.configureCurrentRegion();
+    
+    //this.createMinimap();
+}
+
+World.prototype.configureCurrentRegion = function()
+{
+    if (this.map != null)
     {
-      this.mapSize = 8;
-      this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-3,1199,0);
+      this.map.destroy();
+      this.layer.destroy();
     }
-    else
-    {
-      this.mapSize = 20;
-      this.heightMap = this.generateHeightMap(this.mapSize,[1000,400,100,500,100,100,100,100,100,100,100,100,100,10,10,10,10],-1,1199,0);
-    }
-    this.layer = this.map.create('level1', this.mapSize, this.mapSize, 32, 32);
+    this.map = game.add.tilemap();
+    this.layer = this.map.create('layer', this.mapSize, this.mapSize, 32, 32);
+    this.layer.width=tileWidth*20;
+    this.layer.height=tileHeight*17;
     this.map.addTilesetImage('tileset');
     
     for (var i=0;i<this.mapSize;i++)
-	for (var j=0;j<this.mapSize;j++)
-	{
-	    this.heightMap[i][j] = Math.floor(this.heightMap[i][j]/100);
-	    this.map.putTile(this.heightMap[i][j],i,j,this.layer);
-	}
-    this.numEnemies = 10;
+      for (var j=0;j<this.mapSize;j++)
+      {
+	  this.map.putTile(this.heightMap[i+this.regionX*this.mapSize][j+this.regionY*this.mapSize],i,j,this.layer);
+      }
+
+    this.numEnemies = 5;
     this.enemies = [this.numEnemies];
+    this.createEnemies();
     this.loot = [];
+}
+
+World.prototype.changeRegionRight = function()
+{
+  if (this.regionX < 3)
+  {
+      this.regionX++;
+      this.configureCurrentRegion();
+      this.player.target.x = 0;
+      this.player.recreate();
+  }
+}
+
+World.prototype.changeRegionLeft = function()
+{
+  if (this.regionX > 0)
+  {
+      this.regionX--;
+      this.configureCurrentRegion();
+      this.player.target.x = this.mapSize;
+      this.player.recreate();
+  }
+}
+
+World.prototype.changeRegionUp = function()
+{
+  if (this.regionY > 0)
+  {
+      this.regionY--;
+      this.configureCurrentRegion();
+      this.player.target.y = this.mapSize;
+      this.player.recreate();
+  }
+}
+
+World.prototype.changeRegionDown = function()
+{
+  if (this.regionY < 3)
+  {
+      this.regionY++;
+      this.configureCurrentRegion();
+      this.player.target.y = 0;
+      this.player.recreate();
+  }
+}
+
+World.prototype.isOffMap = function(target)
+{
+    if ((target.x < 0) || (target.y < 0) || (target.x >= this.mapSize) || (target.y >= this.mapSize))
+      return true;
+    return false;
+}
+
+World.prototype.isOffRegionRight = function(target)
+{
+    if ((target.x >= this.mapSize) && (this.regionX < 3))
+      return true;
+    return false;
+}
+
+World.prototype.isOffRegionLeft = function(target)
+{
+    if ((target.x <0 ) && (this.regionX > 0))
+      return true;
+    return false;
+}
+World.prototype.isOffRegionTop = function(target)
+{
+    if ((target.y < 0) && (this.regionY > 0))
+      return true;
+    return false;
+}
+
+World.prototype.isOffRegionBottom = function(target)
+{
+    if ((target.y >= this.mapSize ) && (this.regionY < 3))
+      return true;
+    return false;
+}
+
+
+World.prototype.createMinimap = function()
+{    
+    this.minilayer = this.map.create('minilayer', this.mapSize, this.mapSize, 2, 2);
+    this.map.addTilesetImage('minitileset');
+    var bmd = game.add.bitmapData(160, 160);
+    for (var i=0;i<this.mapSize*4;i++)
+	for (var j=0;j<this.mapSize*4;j++)
+	{
+	  bmd.draw(this.minilayer,i*2+540,j*2,2,2);
+	}
 }
 
 World.prototype.addLoot = function(item)
@@ -57,9 +158,6 @@ World.prototype.getLootAt = function(target)
     return foundLoot;
 }
 
-/*
- * This might hang if there is not enough free space to put enemies.
- */
 World.prototype.createEnemies = function()
 {
     for (var i=0;i<this.numEnemies;i++)
@@ -82,7 +180,7 @@ World.prototype.createEnemies = function()
 	    attempts++;
 	    x = Math.floor(Math.random()*this.mapSize);
 	    y = Math.floor(Math.random()*this.mapSize);
-	    if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})) && !(this.isPlayerAt({x:x,y:y})))
+	    if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})))
 	      found = true;
 	}
 	if (!found)
@@ -124,10 +222,10 @@ World.prototype.getAt = function(target)
 
 World.prototype.isValidTarget = function(target)
 {
-    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.map.width) && (target.y<this.map.height))
+    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
     {
-	if (this.heightMap[target.x][target.y]>3)
-	  if (this.heightMap[target.x][target.y]<10)
+	if (this.heightMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
+	  if (this.heightMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
 	    return true;
     }
     return false;
@@ -136,16 +234,17 @@ World.prototype.isValidTarget = function(target)
 World.prototype.generateHeightMap = function(regionSize,rnr,sealevel,max,min)
 {
     var randomNumberRange = rnr[0];
+    regionSize = regionSize * 4;
     var squaresize = regionSize-1;
 
     //TODO: Gah javascript. Hack.
-    var array = new Array(regionSize+this.mapSize);
-    for (var i=0; i<regionSize+this.mapSize;i++)
+    var array = new Array(regionSize+this.mapSize*4);
+    for (var i=0; i<regionSize+this.mapSize*4;i++)
     {
-	array[i] = new Array(regionSize+this.mapSize);
-	for (var j=0; j<regionSize+this.mapSize;j++)
+	array[i] = new Array(regionSize+this.mapSize*4);
+	for (var j=0; j<regionSize+this.mapSize*4;j++)
 	{
-	    array[i][j] = 3;
+	    array[i][j] = 4;
 	}
     }
 	
@@ -229,7 +328,7 @@ World.prototype.generateHeightMap = function(regionSize,rnr,sealevel,max,min)
 	    if (height < min)
 	      height = min;
 	    array[i][j] = height;
-	    //console.log(array[i][j]);
+	    array[i][j] = Math.floor(array[i][j]/100);
 	}
 		
     return array;

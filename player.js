@@ -2,6 +2,26 @@ function Player()
 {
     this.target = {x:10,y:10};
 
+    this.recreate();
+
+    this.moveLock = false;
+    this.sprite.body.moves = false;
+    this.tileMoveTime = 300;
+    this.hasActed = false;
+    this.animating = false;
+    
+    this.hitPoints = Math.floor(Math.random()*10)+10;
+    this.maxHitPoints = this.hitPoints;
+    this.createHitBar();
+    
+    this.coins = 0;
+}
+
+Player.prototype.recreate = function()
+{
+    if (this.sprite != null)
+      this.sprite.destroy();
+  
     this.sprite = game.add.sprite(this.target.x*tileWidth+tileWidth/2,this.target.y*tileHeight+tileHeight/2, 'characters');
     game.physics.arcade.enable(this.sprite);
     this.sprite.animations.add('pright', [14,15,16,17], 12, true);
@@ -10,20 +30,7 @@ function Player()
     this.sprite.frame=14;
 
     this.sprite.anchor.setTo(0.5,0.5);
-
-    this.moveLock = false;
-    this.sprite.body.moves = false;
-    this.tileMoveTime = 300;
-    this.hasActed = false;
-    this.animating = false;
-
     game.camera.follow(this.sprite);
-    
-    this.hitPoints = Math.floor(Math.random()*10)+10;
-    this.maxHitPoints = this.hitPoints;
-    this.createHitBar();
-    
-    this.coins = 0;
 }
   
 Player.prototype.createHitBar = function()
@@ -198,6 +205,18 @@ Player.prototype.input = function(cursor,world)
 		this.hitBar.scale.x = 1;
 		this.sprite.animations.play('pup');
 	    }
-	}     
+	}
+	else if (world.isOffMap(newTarget))
+	{
+	    if (world.isOffRegionRight(newTarget))
+	      world.changeRegionRight();
+	    if (world.isOffRegionLeft(newTarget))
+	      world.changeRegionLeft();
+	    if (world.isOffRegionTop(newTarget))
+	      world.changeRegionUp();
+	    if (world.isOffRegionBottom(newTarget))
+	      world.changeRegionDown();
+	}
+	
     }
 };
