@@ -123,7 +123,7 @@ World.prototype.createMinimap = function()
     //this.map.addTilesetImage('minitileset');
     var bmd = game.add.bitmapData(160, 160);
     bmd.ctx.beginPath();
-    bmd.ctx.rect(0, 0, 160, 160);
+    bmd.ctx.rect(0, 0, 240, 240);
     bmd.ctx.fillStyle = '#ff0000';
     bmd.ctx.fill();
     for (var i=0;i<this.mapSize*3;i++)
@@ -139,11 +139,11 @@ World.prototype.createMinimap = function()
 	  if (this.player != null)
 	    if ((this.player.target.x == i) && (this.player.target.y == j))
 	      index = 26;
-	  bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,i*2,j*2,2,2);
+	  bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,i*4,j*4,4,4);
 	}
     if (this.minimap != null)
       this.minimap.destroy();
-    this.minimap = game.add.sprite(545,0, bmd);
+    this.minimap = game.add.sprite(640,0, bmd);
     this.minimap.anchor.setTo(0,0);
 }
 
