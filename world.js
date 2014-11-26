@@ -126,8 +126,8 @@ World.prototype.createMinimap = function()
     bmd.ctx.rect(0, 0, 160, 160);
     bmd.ctx.fillStyle = '#ff0000';
     bmd.ctx.fill();
-    for (var i=0;i<this.mapSize*4;i++)
-	for (var j=0;j<this.mapSize*4;j++)
+    for (var i=0;i<this.mapSize*3;i++)
+	for (var j=0;j<this.mapSize*3;j++)
 	{
 	  var index = this.heightMap[i][j];
 	  if (this.enemies != null)
@@ -255,11 +255,11 @@ World.prototype.generateHeightMap = function(regionSize,rnr,sealevel,max,min)
     var squaresize = regionSize-1;
 
     //TODO: Gah javascript. Hack.
-    var array = new Array(regionSize+this.mapSize*4);
-    for (var i=0; i<regionSize+this.mapSize*4;i++)
+    var array = new Array(regionSize+this.mapSize*3);
+    for (var i=0; i<regionSize+this.mapSize*3;i++)
     {
-	array[i] = new Array(regionSize+this.mapSize*4);
-	for (var j=0; j<regionSize+this.mapSize*4;j++)
+	array[i] = new Array(regionSize+this.mapSize*3);
+	for (var j=0; j<regionSize+this.mapSize*3;j++)
 	{
 	    array[i][j] = 4;
 	}
