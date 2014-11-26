@@ -4,12 +4,13 @@ function World()
     
     this.mapSize=20;
    
-    this.heightMap = this.generateHeightMap(this.mapSize,[400,400,300,300,300,170,40,1,1,1,1,1,1,1,1,1],-2.7,1199,0);
+    this.heightMap = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
 
     this.regionX = 0;
     this.regionY = 0;
     
     this.configureCurrentRegion();
+    this.createMinimap();
 
 }
 
@@ -40,7 +41,7 @@ World.prototype.configureCurrentRegion = function()
 
 World.prototype.changeRegionRight = function()
 {
-  if (this.regionX < 3)
+  if (this.regionX < 2)
   {
       this.regionX++;
       this.configureCurrentRegion();
@@ -73,7 +74,7 @@ World.prototype.changeRegionUp = function()
 
 World.prototype.changeRegionDown = function()
 {
-  if (this.regionY < 3)
+  if (this.regionY < 2)
   {
       this.regionY++;
       this.configureCurrentRegion();
@@ -91,7 +92,7 @@ World.prototype.isOffMap = function(target)
 
 World.prototype.isOffRegionRight = function(target)
 {
-    if ((target.x >= this.mapSize) && (this.regionX < 3))
+    if ((target.x >= this.mapSize) && (this.regionX < 2))
       return true;
     return false;
 }
@@ -111,7 +112,7 @@ World.prototype.isOffRegionTop = function(target)
 
 World.prototype.isOffRegionBottom = function(target)
 {
-    if ((target.y >= this.mapSize ) && (this.regionY < 3))
+    if ((target.y >= this.mapSize ) && (this.regionY < 2))
       return true;
     return false;
 }
@@ -121,7 +122,7 @@ World.prototype.createMinimap = function()
 {    
     //this.minilayer = this.map.create('minilayer', this.mapSize, this.mapSize, 2, 2);
     //this.map.addTilesetImage('minitileset');
-    var bmd = game.add.bitmapData(160, 160);
+    var bmd = game.add.bitmapData(240, 240);
     bmd.ctx.beginPath();
     bmd.ctx.rect(0, 0, 240, 240);
     bmd.ctx.fillStyle = '#ff0000';
@@ -130,21 +131,34 @@ World.prototype.createMinimap = function()
 	for (var j=0;j<this.mapSize*3;j++)
 	{
 	  var index = this.heightMap[i][j];
-	  if (this.enemies != null)
-	  {
-	    for (var k=0;k<this.enemies.length;k++)
-	      if ((this.enemies[k].target.x == i) && (this.enemies[k].target.y == j))
-		 index = 27;
-	  }
-	  if (this.player != null)
-	    if ((this.player.target.x == i) && (this.player.target.y == j))
-	      index = 26;
 	  bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,i*4,j*4,4,4);
 	}
     if (this.minimap != null)
       this.minimap.destroy();
     this.minimap = game.add.sprite(640,0, bmd);
     this.minimap.anchor.setTo(0,0);
+}
+
+World.prototype.updateMinimapLayer = function()
+{
+  var bmd = game.add.bitmapData(240, 240);
+  if (this.enemies != null)
+  {
+    for (var k=0;k<this.enemies.length;k++)
+    {
+      var index = 27;
+      bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.enemies[k].target.x+this.regionX*this.mapSize)*4,(this.enemies[k].target.y+this.regionY*this.mapSize)*4,4,4);
+    }
+  }
+  if (this.player != null)
+  {
+    var index = 26;
+    bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.player.target.x+this.regionX*this.mapSize)*4,(this.player.target.y+this.regionY*this.mapSize)*4,4,4);
+  }
+  if (this.minimapLayer != null)
+      this.minimapLayer.destroy();
+  this.minimapLayer = game.add.sprite(640,0, bmd);
+  this.minimapLayer.anchor.setTo(0,0);
 }
 
 World.prototype.addLoot = function(item)
@@ -251,7 +265,7 @@ World.prototype.isValidTarget = function(target)
 World.prototype.generateHeightMap = function(regionSize,rnr,sealevel,max,min)
 {
     var randomNumberRange = rnr[0];
-    regionSize = regionSize * 4;
+    regionSize = regionSize * 3;
     var squaresize = regionSize-1;
 
     //TODO: Gah javascript. Hack.

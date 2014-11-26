@@ -18,9 +18,9 @@ var mainState = {
 
     update: function()
     {
-	if (loopCounter == 50)
+	if (loopCounter == 10)
 	{
-	  this.world.createMinimap();
+	  this.world.updateMinimapLayer();
 	  loopCounter = 0;
 	}
 	else
