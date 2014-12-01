@@ -35,6 +35,7 @@ function Potion(x,y)
 Potion.prototype.pickedUp = function(player)
 {
     player.hitPoints += 10;
+    log.append("The potion restores 10 HP");
     if (player.hitPoints > player.maxHitPoints)
       player.hitPoints = player.maxHitPoints;
     player.updateHitBar();

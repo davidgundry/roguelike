@@ -75,6 +75,7 @@ Player.prototype.updateHitBar = function()
 Player.prototype.damage = function(damage)
 {
     this.hitPoints -= damage;
+    log.append("You were hit for " + damage + " damage!");
     var hurt = game.add.audio('hurt');
     hurt.play();
     
@@ -92,6 +93,7 @@ Player.prototype.damage = function(damage)
   
 Player.prototype.kill = function()
 {
+  log.append("You have been killed.");
  //TODO: stub 
 }
 

@@ -76,14 +76,31 @@ var mainState = {
 	else
 	    game.debug.text('Player Turn', 8, 12);*/
 	game.debug.text(this.player.coins, 120, 12);
+	game.debug.text(log.getLast(),5,555);
       
     }
 };
 
+function Log()
+{
+    this.log = [""];
+}
+
+Log.prototype.append = function(string)
+{
+    this.log.push(string);
+}
+
+Log.prototype.getLast = function()
+{
+    return this.log[this.log.length-1];
+}
+
 var tileWidth = 32, tileHeight = 32;
-var screenDimensions = {height: tileHeight*17, width: tileWidth*20+240};
+var screenDimensions = {height: tileHeight*17+47, width: tileWidth*20+240};
 var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phaser.AUTO, 'gameDiv');
 var AiTurn = false;
+var log = new Log();
 
 var timer = new Phaser.Timer(game,false);
 var loopCounter = 0;
