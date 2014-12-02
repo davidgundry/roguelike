@@ -4,7 +4,10 @@ function World()
     
     this.mapSize=20;
    
-    this.heightMap = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
+    //this.heightMap = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
+    var dungeon = new Dungeon(this.mapSize);
+    dungeon.generate();
+    this.heightMap = dungeon.convert();
 
     this.regionX = 0;
     this.regionY = 0;
@@ -16,6 +19,7 @@ function World()
 
 World.prototype.configureCurrentRegion = function()
 {
+    this.loot = [];
     if (this.map != null)
     {
       this.map.destroy();
@@ -36,7 +40,6 @@ World.prototype.configureCurrentRegion = function()
     this.numEnemies = 5;
     this.enemies = [this.numEnemies];
     this.createEnemies();
-    this.loot = [];
 }
 
 World.prototype.changeRegionRight = function()
