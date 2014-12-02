@@ -24,7 +24,7 @@ World.prototype.configureCurrentRegion = function()
     this.map = game.add.tilemap();
     this.layer = this.map.create('layer', this.mapSize, this.mapSize, 32, 32);
     this.layer.width=tileWidth*20;
-    this.layer.height=tileHeight*17;
+    this.layer.height=tileHeight*20;
     this.map.addTilesetImage('tileset');
     
     for (var i=0;i<this.mapSize;i++)
@@ -261,6 +261,7 @@ World.prototype.isValidTarget = function(target)
     }
     return false;
 }
+
 
 World.prototype.generateHeightMap = function(regionSize,rnr,sealevel,max,min)
 {

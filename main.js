@@ -97,7 +97,7 @@ Log.prototype.getLast = function()
 }
 
 var tileWidth = 32, tileHeight = 32;
-var screenDimensions = {height: tileHeight*17+47, width: tileWidth*20+240};
+var screenDimensions = {height: tileHeight*20+47, width: tileWidth*20+240};
 var game = new Phaser.Game(screenDimensions.width,screenDimensions.height, Phaser.AUTO, 'gameDiv');
 var AiTurn = false;
 var log = new Log();
