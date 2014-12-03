@@ -69,6 +69,8 @@ Dungeon.prototype.generateRegionDungeon = function(origin)
   var targetRooms = RNR(4,8);
   var maxTries = 1000;
   this.gen(maxTries,targetRooms,origin,{top:0,right:this.mapSize,bottom:this.mapSize,left:0});
+  if (this.roomCount == 0)
+    this.generateRegionDungeon(origin); 
 }
 
 Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
@@ -81,8 +83,6 @@ Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
     this.createFeature(rect);
     tries++;
   }
-  if (this.roomCount == 0)
-    this.generateRegionDungeon(); 
 }
 
 var RNR = function(low, high)
@@ -180,6 +180,9 @@ Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=
   else
     var offset = RNR(-height/2-1,0);
 
+  if (typeof location == 'undefined')
+    return false;
+  
   if (!((location.x-width >= rect.left) && (location.y-height >= rect.top) && (location.x+width < rect.right) && (location.y+height < rect.bottom)))
     return false;
   
