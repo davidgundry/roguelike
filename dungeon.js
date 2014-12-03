@@ -61,17 +61,30 @@ var direction = {
 
 Dungeon.prototype.generate = function ()
 {
-  this.createRoom(this.origin,direction.NORTH);
-  var tries = 0;
   var maxTries = 100;
-  var targetRooms = 40;
+  var targetRooms = 20;
+  this.gen(maxTries,targetRooms,{top:0,right:this.regionSize-1,bottom:this.regionSize-1,left:0});
+}
+
+Dungeon.prototype.generateRegionDungeon = function()
+{
+  var targetRooms = RNR(4,8);
+  var maxTries = 1000;
+  this.gen(maxTries,targetRooms,{top:0,right:this.mapSize-1,bottom:this.mapSize-1,left:0});
+}
+
+Dungeon.prototype.gen = function(maxTries,targetRooms,rect)
+{
+  this.createRoom(this.origin,direction.NORTH);
+  this.setTile(this.origin,tile.WALL);
+  var tries = 0;
   while ((this.roomCount < targetRooms) && (tries < maxTries))
   {
     this.createFeature();
     tries++;
   }
   if (this.roomCount == 0)
-    this.generate();
+    this.generateRegionDungeon(); 
 }
 
 var RNR = function(low, high)
