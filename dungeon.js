@@ -64,13 +64,23 @@ Dungeon.prototype.generate = function(origin)
   this.gen(maxTries,targetRooms,origin,{top:0,right:this.regionSize-1,bottom:this.regionSize-1,left:0});
 }
 
-Dungeon.prototype.generateRegionDungeon = function(origin)
+/*
+ * Generates a dungeon within a single region area. Origin MUST be within region!
+ */
+Dungeon.prototype.generateRegionDungeon = function(origin,x,y)
 {
+  var startingRoomCount = this.roomCount;
+  if ((origin.x < x*this.mapSize) || (origin.y*this.mapSize < y) || (origin.x > (x+1)*this.mapSize) || (origin.y > (y+1)*this.mapSize))
+  {
+    console.log("origin must be within region!");
+    return false;
+  }
   var targetRooms = RNR(4,8);
   var maxTries = 1000;
-  this.gen(maxTries,targetRooms,origin,{top:0,right:this.mapSize,bottom:this.mapSize,left:0});
-  if (this.roomCount == 0)
-    this.generateRegionDungeon(origin); 
+  this.gen(maxTries,startingRoomCount+targetRooms,origin,{top:y*this.mapSize,right:x*this.mapSize+this.mapSize,bottom:y*this.mapSize+this.mapSize,left:x*this.mapSize});
+  if (this.roomCount == startingRoomCount)
+    return false;
+  return true;
 }
 
 Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
@@ -96,7 +106,7 @@ var RNR = function(low, high)
     low = Math.floor(low);
   else
     low = Math.ceil(low);
-  var a = Math.floor(Math.random()*high+1)+low;
+  var a = Math.round(Math.random()*high)+low;
   if (a > high)
     a = high;
   return a;

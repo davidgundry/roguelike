@@ -5,9 +5,22 @@ function World()
     this.mapSize=20;
    
     //this.heightMap = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
+    
     var dungeon = new Dungeon(this.mapSize);
-    var origin = {x:Math.floor(this.mapSize/2),y:Math.floor(this.mapSize/2)};
-    dungeon.generateRegionDungeon(origin);
+    for (var i=0;i<3;i++)
+    {
+      var rx = RNR(0,2);
+      var ry = RNR(0,2);
+      var origin = {x:Math.floor(this.mapSize/2)+rx*this.mapSize,y:Math.floor(this.mapSize/2)+ry*this.mapSize};
+      var loops =0;
+      while (!dungeon.generateRegionDungeon(origin,rx,ry))
+      {
+	loops++;
+	if (loops == 100)
+	  break;
+      }
+    }
+    
     this.heightMap = dungeon.convert();
 
     this.regionX = 0;
