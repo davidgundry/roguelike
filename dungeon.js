@@ -70,7 +70,7 @@ Dungeon.prototype.generateRegionDungeon = function()
 {
   var targetRooms = RNR(4,8);
   var maxTries = 1000;
-  this.gen(maxTries,targetRooms,{top:0,right:this.mapSize-1,bottom:this.mapSize-1,left:0});
+  this.gen(maxTries,targetRooms,{top:0,right:this.mapSize,bottom:this.mapSize,left:0});
 }
 
 Dungeon.prototype.gen = function(maxTries,targetRooms,rect)
