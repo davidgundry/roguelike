@@ -75,12 +75,12 @@ Dungeon.prototype.generateRegionDungeon = function()
 
 Dungeon.prototype.gen = function(maxTries,targetRooms,rect)
 {
-  this.createRoom(this.origin,direction.NORTH);
+  this.createRoom(this.origin,direction.NORTH,rect);
   this.setTile(this.origin,tile.WALL);
   var tries = 0;
   while ((this.roomCount < targetRooms) && (tries < maxTries))
   {
-    this.createFeature();
+    this.createFeature(rect);
     tries++;
   }
   if (this.roomCount == 0)
@@ -138,34 +138,34 @@ Dungeon.prototype.isAdjacent = function(location,checkTile)
     return false;
 }
 
-Dungeon.prototype.createFeature = function()
+Dungeon.prototype.createFeature = function(rect)
 {
   var maxTries = 1000;
   for (var i=0;i<maxTries;i++)
   {
-    var location = {x:RNR(0,this.regionSize),y:RNR(0,this.regionSize)};
+    var location = {x:RNR(rect.left,rect.right),y:RNR(rect.top,rect.bottom)};
     if (this.getTile(location) == tile.WALL)
     {
       if (!this.isAdjacent(location,tile.DOOR))
       {
 	if (this.getCell(location.x,location.y-1) == tile.FLOOR)
 	{
-	  this.createRoom(location,direction.SOUTH);
+	  this.createRoom(location,direction.SOUTH,rect);
 	  break;
 	}
 	else if (this.getCell(location.x,location.y+1) == tile.FLOOR)
 	{
-	  this.createRoom(location,direction.NORTH);
+	  this.createRoom(location,direction.NORTH,rect);
 	  break;
 	}
 	else if (this.getCell(location.x-1,location.y) == tile.FLOOR)
 	{
-	  this.createRoom(location,direction.EAST);
+	  this.createRoom(location,direction.EAST,rect);
 	  break;
 	}
 	else if (this.getCell(location.x+1,location.y) == tile.FLOOR)
 	{
-	  this.createRoom(location,direction.WEST);
+	  this.createRoom(location,direction.WEST,rect);
 	  break;
 	}
       }
@@ -173,7 +173,7 @@ Dungeon.prototype.createFeature = function()
   }
 }
 
-Dungeon.prototype.createRoom = function(location,dir,floor=tile.FLOOR,door=tile.DOOR,wall=tile.WALL)
+Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=tile.DOOR,wall=tile.WALL)
 {
   var width = RNR(3,11);
   var height = RNR(3,11);
@@ -182,7 +182,7 @@ Dungeon.prototype.createRoom = function(location,dir,floor=tile.FLOOR,door=tile.
   else
     var offset = RNR(-height/2-1,0);
 
-  if (!((location.x-width >= 0) && (location.y-height >= 0) && (location.x+width < this.regionSize) && (location.y+height < this.regionSize)))
+  if (!((location.x-width >= rect.left) && (location.y-height >= rect.top) && (location.x+width < rect.right) && (location.y+height < rect.bottom)))
     return false;
   
   for (var i=0;i<width;i++)
