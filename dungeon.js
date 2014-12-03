@@ -62,9 +62,13 @@ var direction = {
 Dungeon.prototype.generate = function ()
 {
   this.createRoom(this.origin,direction.NORTH);
-  for (var i=0;i<20;i++)
+  var tries = 0;
+  var maxTries = 100;
+  var targetRooms = 40;
+  while ((this.roomCount < targetRooms) && (tries < maxTries))
   {
-      this.createFeature();
+    this.createFeature();
+    tries++;
   }
   if (this.roomCount == 0)
     this.generate();
@@ -165,6 +169,8 @@ Dungeon.prototype.createRoom = function(location,dir,floor=tile.FLOOR,door=tile.
   else
     var offset = RNR(-height/2-1,0);
 
+  if (!((location.x-width >= 0) && (location.y-height >= 0) && (location.x+width < this.regionSize) && (location.y+height < this.regionSize)))
+    return false;
   
   for (var i=0;i<width;i++)
     for (var j=0;j<height;j++)
