@@ -6,7 +6,8 @@ function World()
    
     //this.heightMap = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
     var dungeon = new Dungeon(this.mapSize);
-    dungeon.generateRegionDungeon();
+    var origin = {x:Math.floor(this.mapSize/2),y:Math.floor(this.mapSize/2)};
+    dungeon.generateRegionDungeon(origin);
     this.heightMap = dungeon.convert();
 
     this.regionX = 0;

@@ -13,8 +13,6 @@ function Dungeon(regionSize)
 	    this.array[i][j] = tile.UNUSED;
 	}
     }
-    
-    this.origin = {x:Math.floor(regionSize/2),y:Math.floor(regionSize/2)};
 }
 
 Dungeon.prototype.convert = function()
@@ -59,24 +57,24 @@ var direction = {
       WEST : "west"
     }
 
-Dungeon.prototype.generate = function ()
+Dungeon.prototype.generate = function(origin)
 {
   var maxTries = 100;
   var targetRooms = 20;
-  this.gen(maxTries,targetRooms,{top:0,right:this.regionSize-1,bottom:this.regionSize-1,left:0});
+  this.gen(maxTries,targetRooms,origin,{top:0,right:this.regionSize-1,bottom:this.regionSize-1,left:0});
 }
 
-Dungeon.prototype.generateRegionDungeon = function()
+Dungeon.prototype.generateRegionDungeon = function(origin)
 {
   var targetRooms = RNR(4,8);
   var maxTries = 1000;
-  this.gen(maxTries,targetRooms,{top:0,right:this.mapSize,bottom:this.mapSize,left:0});
+  this.gen(maxTries,targetRooms,origin,{top:0,right:this.mapSize,bottom:this.mapSize,left:0});
 }
 
-Dungeon.prototype.gen = function(maxTries,targetRooms,rect)
+Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
 {
-  this.createRoom(this.origin,direction.NORTH,rect);
-  this.setTile(this.origin,tile.WALL);
+  this.createRoom(origin,direction.NORTH,rect);
+  this.setTile(origin,tile.WALL);
   var tries = 0;
   while ((this.roomCount < targetRooms) && (tries < maxTries))
   {
