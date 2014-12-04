@@ -313,7 +313,7 @@ World.prototype.getObjectAt = function(target)
 
 World.prototype.useObjectAt = function(target)
 {
-    var o = getObjectAt(target);
+    var o = this.getObjectAt(target);
     if (o.object == object.ENTRANCE)
     {
 	this.switchLevel(1);

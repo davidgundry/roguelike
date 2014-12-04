@@ -146,6 +146,7 @@ Player.prototype.input = function(cursor,world)
     {
 	if (world.isObjectAt(newTarget))
 	{
+	  world.useObjectAt(newTarget);
 	}
 	else if (world.isEnemyAt(newTarget))
 	{
