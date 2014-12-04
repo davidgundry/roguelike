@@ -6,7 +6,7 @@ function World()
    
     var surface = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
     this.maps = [surface]
-    this.currentMaps = this.maps[0];
+    this.currentLevel = 0;
     this.dungeons = [];
 
     this.regionX = 0;
@@ -17,7 +17,7 @@ function World()
     this.numEnemies = 5;
     this.enemies = [];
     this.configureDungeonEntrances();
-    this.currentMaps = this.maps[1];
+    this.currentMaps = this.maps[this.currentLevel];
     
     this.createCurrentRegion();
     this.createMinimap();
@@ -299,6 +299,33 @@ World.prototype.isObjectAt = function(target)
 	    return true;
     }
     return false;
+}
+
+World.prototype.getObjectAt = function(target)
+{
+    var foundObject;
+    for (var i=0;i<this.objects.length;i++)
+    {
+	if ((this.objects[i].location.x == target.x) && (this.objects[i].location.y == target.y))
+	    return this.objects[i];
+    }
+}
+
+World.prototype.useObjectAt = function(target)
+{
+    var o = getObjectAt(target);
+    if (o.object == object.ENTRANCE)
+    {
+	this.switchLevel(1);
+    }
+}
+
+World.prototype.switchLevel = function(level)
+{
+    this.currentMaps = this.maps[level];
+    this.currentLevel = level;
+    this.createCurrentRegion();
+    this.player.recreate();
 }
 
 World.prototype.isPlayerAt = function(target)
