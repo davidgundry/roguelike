@@ -4,36 +4,75 @@ function World()
     
     this.mapSize=20;
    
-    //this.heightMap = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
+    var surface = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
+    this.maps = [surface]
+    this.currentMaps = this.maps[0];
+    this.dungeons = [];
+
+    this.regionX = 0;
+    this.regionY = 0;
+        
+    this.objects = [];
+    this.loot = [];
+    this.numEnemies = 5;
+    this.enemies = [];
+    this.configureDungeonEntrances();
+    this.currentMaps = this.maps[1];
     
-    var dungeon = new Dungeon(this.mapSize);
-    for (var i=0;i<3;i++)
+    this.configureCurrentRegion();
+    this.createMinimap();
+
+
+}
+
+World.prototype.configureDungeonEntrances = function()
+{
+  if (this.dungeons[0] == null)
+  {
+    this.dungeons[0] = new Dungeon(this.mapSize);
+  
+    var numEntrances = 4;
+    for (var i=0;i<numEntrances;i++)
     {
-      var rx = RNR(0,2);
-      var ry = RNR(0,2);
-      var origin = {x:Math.floor(this.mapSize/2)+rx*this.mapSize,y:Math.floor(this.mapSize/2)+ry*this.mapSize};
+      var rx = RNR(0,0);
+      var ry = RNR(0,0);
+      var inx = RNR(0,this.mapSize);
+      var iny = RNR(0,this.mapSize);
+      var origin = {x:inx+rx*this.mapSize,y:iny+ry*this.mapSize};
       var loops =0;
-      while (!dungeon.generateRegionDungeon(origin,rx,ry))
+      while (!this.dungeons[0].generateRegionDungeon(origin,rx,ry))
       {
 	loops++;
 	if (loops == 100)
 	  break;
       }
+      if (loops < 100)
+      {
+	this.dungeons[0].createEntrance(origin);
+	this.createObject(origin,object.ENTRANCE);
+      }
     }
-    
-    this.heightMap = dungeon.convert();
+      
+    this.maps[1] = this.dungeons[0].convert();
+  }
+}
 
-    this.regionX = 0;
-    this.regionY = 0;
-    
-    this.configureCurrentRegion();
-    this.createMinimap();
+World.prototype.createObjects = function()
+{
+  for (var i=0;i<this.objects.length;i++)
+  {
+      var objectSprite = game.add.sprite(this.objects[i].location.x*tileWidth,this.objects[i].location.y*tileHeight,'objects');
+      objectSprite.frame=73;
+  }
+}
 
+World.prototype.createObject = function(location,object)
+{
+    this.objects.push({location:location,object:object});
 }
 
 World.prototype.configureCurrentRegion = function()
 {
-    this.loot = [];
     if (this.map != null)
     {
       this.map.destroy();
@@ -48,11 +87,10 @@ World.prototype.configureCurrentRegion = function()
     for (var i=0;i<this.mapSize;i++)
       for (var j=0;j<this.mapSize;j++)
       {
-	  this.map.putTile(this.heightMap[i+this.regionX*this.mapSize][j+this.regionY*this.mapSize],i,j,this.layer);
+	  this.map.putTile(this.currentMaps[i+this.regionX*this.mapSize][j+this.regionY*this.mapSize],i,j,this.layer);
       }
-
-    this.numEnemies = 5;
-    this.enemies = [this.numEnemies];
+      
+    this.createObjects();
     this.createEnemies();
 }
 
@@ -147,7 +185,7 @@ World.prototype.createMinimap = function()
     for (var i=0;i<this.mapSize*3;i++)
 	for (var j=0;j<this.mapSize*3;j++)
 	{
-	  var index = this.heightMap[i][j];
+	  var index = this.currentMaps[i][j];
 	  bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,i*4,j*4,4,4);
 	}
     if (this.minimap != null)
@@ -272,8 +310,8 @@ World.prototype.isValidTarget = function(target)
 {
     if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
     {
-	if (this.heightMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
-	  if (this.heightMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
+	if (this.currentMaps[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
+	  if (this.currentMaps[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
 	    return true;
     }
     return false;

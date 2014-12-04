@@ -3,6 +3,7 @@ function Dungeon(regionSize)
     this.regionSize = regionSize * 3;
     this.mapSize = 20;
     this.roomCount = 0;
+    this.objects = [];
   
     this.array = new Array(this.regionSize+this.mapSize*3);
     for (var i=0; i<this.regionSize+this.mapSize*3;i++)
@@ -48,6 +49,10 @@ var tile = {
       UNUSED : "unused",
       DOOR : "door",
       CORRIDOR : "corridor"
+    }
+    
+var object = {
+      ENTRANCE : "entrance"
     }
     
 var direction = {
@@ -144,6 +149,16 @@ Dungeon.prototype.isAdjacent = function(location,checkTile)
     if (this.getCell(location.x-1,location.y) == checkTile)
       return true;
     return false;
+}
+
+Dungeon.prototype.createEntrance = function(location)
+{
+  this.createObject(location,object.ENTRANCE);
+}
+
+Dungeon.prototype.createObject = function(location,object)
+{
+    this.objects.push({location:location,object:object});
 }
 
 Dungeon.prototype.createFeature = function(rect)
