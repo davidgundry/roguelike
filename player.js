@@ -144,7 +144,10 @@ Player.prototype.input = function(cursor,world)
     
     if (pressedKey)
     {
-	if (world.isEnemyAt(newTarget))
+	if (world.isObjectAt(newTarget))
+	{
+	}
+	else if (world.isEnemyAt(newTarget))
 	{
 	    this.attack(newTarget,world);
 	    this.hasActed = true;

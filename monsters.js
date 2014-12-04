@@ -101,7 +101,11 @@ Monster.prototype.moveAction = function(world,direction)
     {
 	newTarget.x -=1;
     }
-    if (world.isPlayerAt(newTarget))
+    if (world.isObjectAt(newTarget))
+    {
+      
+    }
+    else if (world.isPlayerAt(newTarget))
     {
 	this.animating = true;
 	world.player.damage(Math.floor(Math.random(6)+1));

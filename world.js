@@ -19,7 +19,7 @@ function World()
     this.configureDungeonEntrances();
     this.currentMaps = this.maps[1];
     
-    this.configureCurrentRegion();
+    this.createCurrentRegion();
     this.createMinimap();
 
 
@@ -31,7 +31,7 @@ World.prototype.configureDungeonEntrances = function()
   {
     this.dungeons[0] = new Dungeon(this.mapSize);
   
-    var numEntrances = 4;
+    var numEntrances = 1;
     for (var i=0;i<numEntrances;i++)
     {
       var rx = RNR(0,0);
@@ -71,7 +71,7 @@ World.prototype.createObject = function(location,object)
     this.objects.push({location:location,object:object});
 }
 
-World.prototype.configureCurrentRegion = function()
+World.prototype.createCurrentRegion = function()
 {
     if (this.map != null)
     {
@@ -99,7 +99,7 @@ World.prototype.changeRegionRight = function()
   if (this.regionX < 2)
   {
       this.regionX++;
-      this.configureCurrentRegion();
+      this.createCurrentRegion();
       this.player.target.x = 0;
       this.player.recreate();
   }
@@ -110,7 +110,7 @@ World.prototype.changeRegionLeft = function()
   if (this.regionX > 0)
   {
       this.regionX--;
-      this.configureCurrentRegion();
+      this.createCurrentRegion();
       this.player.target.x = this.mapSize;
       this.player.recreate();
   }
@@ -121,7 +121,7 @@ World.prototype.changeRegionUp = function()
   if (this.regionY > 0)
   {
       this.regionY--;
-      this.configureCurrentRegion();
+      this.createCurrentRegion();
       this.player.target.y = this.mapSize;
       this.player.recreate();
   }
@@ -132,7 +132,7 @@ World.prototype.changeRegionDown = function()
   if (this.regionY < 2)
   {
       this.regionY++;
-      this.configureCurrentRegion();
+      this.createCurrentRegion();
       this.player.target.y = 0;
       this.player.recreate();
   }
@@ -266,7 +266,7 @@ World.prototype.createEnemies = function()
 	    attempts++;
 	    x = Math.floor(Math.random()*this.mapSize);
 	    y = Math.floor(Math.random()*this.mapSize);
-	    if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})))
+	    if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})) && !(this.isObjectAt({x:x,y:y})))
 	      found = true;
 	}
 	if (!found)
@@ -286,6 +286,16 @@ World.prototype.isEnemyAt = function(target)
     for (var i=0;i<this.numEnemies;i++)
     {
 	if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
+	    return true;
+    }
+    return false;
+}
+
+World.prototype.isObjectAt = function(target)
+{
+    for (var i=0;i<this.objects.length;i++)
+    {
+	if ((this.objects[i].location.x == target.x) && (this.objects[i].location.y == target.y))
 	    return true;
     }
     return false;
@@ -312,7 +322,7 @@ World.prototype.isValidTarget = function(target)
     {
 	if (this.currentMaps[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
 	  if (this.currentMaps[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
-	    return true;
+	      return true;
     }
     return false;
 }

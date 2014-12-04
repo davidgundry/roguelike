@@ -163,7 +163,7 @@ Dungeon.prototype.createObject = function(location,object)
 
 Dungeon.prototype.createFeature = function(rect)
 {
-  var maxTries = 1000;
+  var maxTries = 100;
   for (var i=0;i<maxTries;i++)
   {
     var location = {x:RNR(rect.left,rect.right),y:RNR(rect.top,rect.bottom)};
@@ -198,8 +198,8 @@ Dungeon.prototype.createFeature = function(rect)
 
 Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=tile.DOOR,wall=tile.WALL)
 {
-  var width = RNR(4,11);
-  var height = RNR(4,11);
+  var width = RNR(4,8);
+  var height = RNR(4,8);
   if ((dir == direction.NORTH) || (dir == direction.SOUTH))
     var offset = RNR(-width/2,0);
   else
