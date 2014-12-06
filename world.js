@@ -1,73 +1,33 @@
 function World()
 {
     this.player = null;
+    this.loot = [];
+    this.monsters = [];
     
     this.mapSize=20;
    
-    var surface = this.generateHeightMap(this.mapSize,[400,200,100,100,50,10,4,1,1,1,1,1,1,1,1,1],-35,1199,0);
-    this.maps = [surface]
     this.currentLevel = 0;
-    this.dungeons = [];
+    this.levels = [];
 
     this.regionX = 0;
     this.regionY = 0;
-        
-    this.objects = [];
-    this.loot = [];
-    this.monsters = [];
-    this.configureDungeonEntrances();
-    this.currentMaps = this.maps[this.currentLevel];
-    
-    this.createCurrentRegion();
-    this.createMinimap();
-
-
+    this.create();
 }
 
-World.prototype.configureDungeonEntrances = function()
+World.prototype.create = function()
 {
-  if (this.dungeons[0] == null)
-  {
-    this.dungeons[0] = new Dungeon(this.mapSize);
-  
-    var numEntrances = 1;
-    for (var i=0;i<numEntrances;i++)
-    {
-      var rx = RNR(0,0);
-      var ry = RNR(0,0);
-      var inx = RNR(0,this.mapSize);
-      var iny = RNR(0,this.mapSize);
-      var origin = {x:inx+rx*this.mapSize,y:iny+ry*this.mapSize};
-      var loops =0;
-      while (!this.dungeons[0].generateRegionDungeon(origin,rx,ry))
-      {
-	loops++;
-	if (loops == 100)
-	  break;
-      }
-      if (loops < 100)
-      {
-	this.dungeons[0].createEntrance(origin);
-	this.createObject(origin,object.ENTRANCE);
-      }
-    }
-      
-    this.maps[1] = this.dungeons[0].convert();
-  }
+    this.levels[0] = new Surface(this);
+    this.levels[0].generate();
+    this.createCurrentRegion();
 }
 
 World.prototype.createObjects = function()
 {
-  for (var i=0;i<this.objects.length;i++)
+  for (var i=0;i<this.levels[this.currentLevel].objects.length;i++)
   {
-      var objectSprite = game.add.sprite(this.objects[i].location.x*tileWidth,this.objects[i].location.y*tileHeight,'objects');
+      var objectSprite = game.add.sprite(this.levels[this.currentLevel].objects[i].location.x*tileWidth,this.levels[this.currentLevel].objects[i].location.y*tileHeight,'objects');
       objectSprite.frame=73;
   }
-}
-
-World.prototype.createObject = function(location,object)
-{
-    this.objects.push({location:location,object:object});
 }
 
 World.prototype.createCurrentRegion = function()
@@ -77,6 +37,7 @@ World.prototype.createCurrentRegion = function()
       this.map.destroy();
       this.layer.destroy();
     }
+    this.killAll();
     this.map = game.add.tilemap();
     this.layer = this.map.create('layer', this.mapSize, this.mapSize, 32, 32);
     this.layer.width=tileWidth*20;
@@ -86,11 +47,23 @@ World.prototype.createCurrentRegion = function()
     for (var i=0;i<this.mapSize;i++)
       for (var j=0;j<this.mapSize;j++)
       {
-	  this.map.putTile(this.currentMaps[i+this.regionX*this.mapSize][j+this.regionY*this.mapSize],i,j,this.layer);
+	  this.map.putTile(this.levels[this.currentLevel].map[i+this.regionX*this.mapSize][j+this.regionY*this.mapSize],i,j,this.layer);
       }
       
     this.createObjects();
-    this.createEnemies();
+    this.createMonsters();
+    this.createMinimap();
+    this.updateMinimapLayer();
+}
+
+World.prototype.killAll = function()
+{
+    for (var i=0;i<this.monsters.length;i++)
+      this.monsters[i].sprite.destroy();
+    for (var i=0;i<this.loot.length;i++)
+      this.loot[i].sprite.destroy();
+    this.monsters = [];
+    this.loot = [];
 }
 
 World.prototype.changeRegionRight = function()
@@ -174,8 +147,6 @@ World.prototype.isOffRegionBottom = function(target)
 
 World.prototype.createMinimap = function()
 {    
-    //this.minilayer = this.map.create('minilayer', this.mapSize, this.mapSize, 2, 2);
-    //this.map.addTilesetImage('minitileset');
     var bmd = game.add.bitmapData(240, 240);
     bmd.ctx.beginPath();
     bmd.ctx.rect(0, 0, 240, 240);
@@ -184,7 +155,7 @@ World.prototype.createMinimap = function()
     for (var i=0;i<this.mapSize*3;i++)
 	for (var j=0;j<this.mapSize*3;j++)
 	{
-	  var index = this.currentMaps[i][j];
+	  var index = this.levels[this.currentLevel].map[i][j];
 	  bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,i*4,j*4,4,4);
 	}
     if (this.minimap != null)
@@ -196,12 +167,12 @@ World.prototype.createMinimap = function()
 World.prototype.updateMinimapLayer = function()
 {
   var bmd = game.add.bitmapData(240, 240);
-  if (this.enemies != null)
+  if (this.monsters != null)
   {
-    for (var k=0;k<this.enemies.length;k++)
+    for (var k=0;k<this.monsters.length;k++)
     {
       var index = 27;
-      bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.enemies[k].target.x+this.regionX*this.mapSize)*4,(this.enemies[k].target.y+this.regionY*this.mapSize)*4,4,4);
+      bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.monsters[k].target.x+this.regionX*this.mapSize)*4,(this.monsters[k].target.y+this.regionY*this.mapSize)*4,4,4);
     }
   }
   if (this.player != null)
@@ -232,7 +203,7 @@ World.prototype.isLootAt = function(target)
 
 World.prototype.getLootAt = function(target)
 {
-    var foundLoot= [];
+    var foundLoot = [];
     for (var i=0;i<this.loot.length;i++)
     {
 	if ((this.loot[i].target.x == target.x) && (this.loot[i].target.y == target.y))
@@ -243,48 +214,33 @@ World.prototype.getLootAt = function(target)
     return foundLoot;
 }
 
-World.prototype.createEnemies = function()
+World.prototype.createMonsters = function()
 {
-    for (var i=0;i<this.numEnemies;i++)
+    for (var i=0;i<this.levels[this.currentLevel].enemies.length;i++)
     {
-	if (Math.random() > 0.9)
-	  this.enemies[i] = new MonsterBandit(-1,-1,this);
-	else if (Math.random() > 0.8)
-	  this.enemies[i] = new MonsterGolem(-1,-1,this);
-	else
-	  this.enemies[i] = new MonsterAnimal(-1,-1,this);
-    }
-    
-    for (var i=0;i<this.numEnemies;i++)
-    {
-	var x,y;
-	var found = false;
-	var attempts = 0;
-	while ((!found) && (attempts < 10))
+	if (this.levels[this.currentLevel].enemies[i].location.x != -1)
 	{
-	    attempts++;
-	    x = Math.floor(Math.random()*this.mapSize);
-	    y = Math.floor(Math.random()*this.mapSize);
-	    if ((this.isValidTarget({x:x,y:y})) && !(this.isEnemyAt({x:x,y:y})) && !(this.isObjectAt({x:x,y:y})))
-	      found = true;
+	    switch (this.levels[this.currentLevel].enemies[i].enemy)
+	    {
+	      case enemy.BANDIT:
+		this.monsters[i] = new MonsterBandit(this.levels[this.currentLevel].enemies[i].location.x,this.levels[this.currentLevel].enemies[i].location.y,this);
+		break;
+	      case enemy.GOLEM:
+		this.monsters[i] = new MonsterGolem(this.levels[this.currentLevel].enemies[i].location.x,this.levels[this.currentLevel].enemies[i].location.y,this);
+		break;
+	      case enemy.ANIMAL:
+		this.monsters[i] = new MonsterAnimal(this.levels[this.currentLevel].enemies[i].location.x,this.levels[this.currentLevel].enemies[i].location.y,this);
+		break;
+	    }
 	}
-	if (!found)
-	{
-	    x = -1;
-	    y = -1;
-	}
-	this.enemies[i].target = {x:x,y:y};
-	this.enemies[i].setSpritePosition();
-	if (!found)
-	    this.enemies[i].kill();
     }
 }
 
-World.prototype.isEnemyAt = function(target)
+World.prototype.isMonsterAt = function(target)
 {
-    for (var i=0;i<this.numEnemies;i++)
+    for (var i=0;i<this.monsters.length;i++)
     {
-	if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
+	if ((this.monsters[i].target.x == target.x) && (this.monsters[i].target.y == target.y))
 	    return true;
     }
     return false;
@@ -292,9 +248,9 @@ World.prototype.isEnemyAt = function(target)
 
 World.prototype.isObjectAt = function(target)
 {
-    for (var i=0;i<this.objects.length;i++)
+    for (var i=0;i<this.levels[this.currentLevel].objects.length;i++)
     {
-	if ((this.objects[i].location.x == target.x) && (this.objects[i].location.y == target.y))
+	if ((this.levels[this.currentLevel].objects[i].location.x == target.x) && (this.levels[this.currentLevel].objects[i].location.y == target.y))
 	    return true;
     }
     return false;
@@ -303,31 +259,41 @@ World.prototype.isObjectAt = function(target)
 World.prototype.getObjectAt = function(target)
 {
     var foundObject;
-    for (var i=0;i<this.objects.length;i++)
+    for (var i=0;i<this.levels[this.currentLevel].objects.length;i++)
     {
-	if ((this.objects[i].location.x == target.x) && (this.objects[i].location.y == target.y))
-	    return this.objects[i];
+	if ((this.levels[this.currentLevel].objects[i].location.x == target.x) && (this.levels[this.currentLevel].objects[i].location.y == target.y))
+	    return this.levels[this.currentLevel].objects[i];
     }
+    return null;
 }
 
 World.prototype.useObjectAt = function(target)
 {
     var o = this.getObjectAt(target);
-    if (o.object == object.ENTRANCE)
+    if (o != null)
     {
-	if (this.currentLevel == 0)
-	  this.switchLevel(1);
-	else if (this.currentLevel == 1)
-	  this.switchLevel(0);
+      if (o.object == object.ENTRANCE)
+      {
+	  if (this.currentLevel == 0)
+	    this.switchLevel(1);
+	  else if (this.currentLevel == 1)
+	    this.switchLevel(0);
+      }
     }
+    else
+      console.log("Attempted to use non-existant object");
 }
 
 World.prototype.switchLevel = function(level)
 {
-    this.currentMaps = this.maps[level];
-    this.currentLevel = level;
-    this.createCurrentRegion();
-    this.player.recreate();
+    if (level < this.levels.length)
+    {
+      this.currentLevel = level;
+      this.createCurrentRegion();
+      this.player.recreate();
+    }
+    else
+      console.log("Attempted to switch to non-existant level");
 }
 
 World.prototype.isPlayerAt = function(target)
@@ -335,12 +301,12 @@ World.prototype.isPlayerAt = function(target)
     return ((this.player.target.x == target.x) && (this.player.target.y == target.y));
 }
 
-World.prototype.getAt = function(target)
+World.prototype.getMonsterAt = function(target)
 {
-    for (var i=0;i<this.numEnemies;i++)
+    for (var i=0;i<this.monsters.length;i++)
     {
-	if ((this.enemies[i].target.x == target.x) && (this.enemies[i].target.y == target.y))
-	  return this.enemies[i];
+	if ((this.monsters[i].target.x == target.x) && (this.monsters[i].target.y == target.y))
+	  return this.monsters[i];
     }
     return null;
 }
@@ -349,113 +315,11 @@ World.prototype.isValidTarget = function(target)
 {
     if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
     {
-	if (this.currentMaps[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
-	  if (this.currentMaps[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
+	if (this.levels[this.currentLevel].map[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
+	  if (this.levels[this.currentLevel].map[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
 	      return true;
     }
     return false;
 }
 
 
-World.prototype.generateHeightMap = function(regionSize,rnr,sealevel,max,min)
-{
-    var randomNumberRange = rnr[0];
-    regionSize = regionSize * 3;
-    var squaresize = regionSize-1;
-
-    //TODO: Gah javascript. Hack.
-    var array = new Array(regionSize+this.mapSize*3);
-    for (var i=0; i<regionSize+this.mapSize*3;i++)
-    {
-	array[i] = new Array(regionSize+this.mapSize*3);
-	for (var j=0; j<regionSize+this.mapSize*3;j++)
-	{
-	    array[i][j] = 4;
-	}
-    }
-	
-    array[0][0] = Math.random()*randomNumberRange;
-    array[0][regionSize-1] = Math.random()*randomNumberRange;
-    array[regionSize-1][0] = Math.random()*randomNumberRange;
-    array[regionSize-1][regionSize-1] = Math.random()*randomNumberRange;
-
-    randomNumberRange = rnr[1];
-
-    var loop = 0;
-    while (squaresize >= 2)
-    {
-	loop += 1;
-	// square step
-	for (var i=0; i<Math.floor(regionSize/squaresize);i++)
-	{
-	    for (var j=0;j<Math.floor(regionSize/squaresize);j++)
-	    {
-		var e = array[Math.floor(i*squaresize)][Math.floor(j*squaresize)];
-		var f = array[Math.floor((i+1)*squaresize)][Math.floor(j*squaresize)];
-		var g = array[Math.floor(i*squaresize)][Math.floor((j+1)*squaresize)];
-		var h = array[Math.floor((i+1)*squaresize)][Math.floor((j+1)*squaresize)];
-		var squareav = Math.floor((e+ f + g + h)/4);
-		array[Math.floor(i*squaresize + squaresize/2)][Math.floor(j*squaresize + squaresize/2)] = squareav + Math.random()*randomNumberRange;
-	    }
-	}
-	// diamond step
-	for (var i=0;i<Math.floor(regionSize/squaresize);i++)
-	{
-	    for (var j=0;j<Math.floor(regionSize/squaresize);j++)
-	    {
-	      var a,b,c,d,x,y,w,z;
-		if (Math.floor(-squaresize/2+ j*squaresize) < 0)
-		    a = array[Math.floor(i*squaresize + squaresize/2)][Math.floor(-squaresize/2 + j*squaresize + regionSize)];
-		else
-		    a = array[Math.floor(i*squaresize + squaresize/2)][Math.floor(-squaresize/2 + j*squaresize)];
-		b = array[Math.floor(i*squaresize + squaresize)][Math.floor(0 + j*squaresize)];
-		c = array[Math.floor(i*squaresize)][Math.floor(0 + j*squaresize)];
-		if (Math.floor(squaresize/2 + j*squaresize) < regionSize) 
-		    d = array[Math.floor(i*squaresize + squaresize/2)][Math.floor(squaresize/2 + j*squaresize)];
-		else
-		    d = array[Math.floor(i*squaresize + squaresize/2)][Math.floor(squaresize/2 + j*squaresize-regionSize)];
-		var diamondav = Math.floor((a + b + c + d)/4);
-		array[Math.floor(i*squaresize)][Math.floor(j*squaresize + squaresize/2)] = diamondav + Math.random()*randomNumberRange;
-		
-		if (Math.floor(-squaresize/2 + i*squaresize) < 0)
-		    w = array[Math.floor(-squaresize/2 + i*squaresize+regionSize)][Math.floor(j*squaresize + squaresize/2)];
-		else
-		    w = array[Math.floor(-squaresize/2 + i*squaresize)][Math.floor(j*squaresize + squaresize/2)];
-		x = array[Math.floor(0 + i*squaresize)][Math.floor(j*squaresize)];
-		y = array[Math.floor(0 + i*squaresize)][Math.floor(j*squaresize+squaresize)];
-		if (Math.floor(squaresize/2 + i*squaresize) < regionSize)
-		    z = array[Math.floor(squaresize/2 + i*squaresize)][Math.floor(j*squaresize + squaresize/2)];
-		else
-		    z = array[Math.floor(squaresize/2 + i*squaresize-regionSize)][Math.floor(j*squaresize + squaresize/2)];
-		var diamondav2 = Math.floor((w + x + y + z)/4);
-		array[Math.floor(i*squaresize + squaresize/2)][Math.floor(j*squaresize)] = diamondav2 + Math.random()*randomNumberRange;
-	    }
-	}
-	squaresize = Math.floor(squaresize/2);
-	randomNumberRange = rnr[loop+1];
-    }
-
-    averageAlt = 0;
-
-    //Calculate the average altitude
-    for (var i=0;i<regionSize;i++)
-	for (var j=0;j<regionSize;j++)
-	    averageAlt += array[i][j];
-
-    var averageAlt = Math.floor(averageAlt / (regionSize*regionSize));
-
-    // Lower the world depending on the height of the sealevel
-    for (var i=0;i<regionSize;i++)
-	for (var j=0;j<regionSize;j++)
-	{
-	    var height = Math.floor( array[i][j] - averageAlt*sealevel);
-	    if (height > max)
-	      height = max;
-	    if (height < min)
-	      height = min;
-	    array[i][j] = height;
-	    array[i][j] = Math.floor(array[i][j]/100);
-	}
-		
-    return array;
-}

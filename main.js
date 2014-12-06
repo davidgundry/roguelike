@@ -25,9 +25,9 @@ var mainState = {
 	}
 	else
 	  loopCounter++;
-	for (var i=0;i<this.world.numEnemies;i++)
-	    if (this.world.enemies[i].alive)
-		this.world.enemies[i].move();
+	for (var i=0;i<this.world.monsters.length;i++)
+	    if (this.world.monsters[i].alive)
+		this.world.monsters[i].move();
 	  
 	if (!AiTurn)
 	{
@@ -41,29 +41,29 @@ var mainState = {
 
     runAiTurn: function()
     {    
-	for (var i=0;i<this.world.numEnemies;i++)
+	for (var i=0;i<this.world.monsters.length;i++)
 	{
-	    if (this.world.enemies[i].alive)
-	      if (!this.world.enemies[i].moveLock)
-		  if (!this.world.enemies[i].hasActed)
-		      this.world.enemies[i].act(this.world);
+	    if (this.world.monsters[i].alive)
+	      if (!this.world.monsters[i].moveLock)
+		  if (!this.world.monsters[i].hasActed)
+		      this.world.monsters[i].act(this.world);
 	}
 	
 	var allDone = true;
-	for (var i=0;i<this.world.numEnemies;i++)
-	    if (this.world.enemies[i].alive)
-		if (!((this.world.enemies[i].hasActed)))// && (!this.world.enemies[i].moveLock))) 	//Non-blocking version
-		//if (!((this.world.enemies[i].hasActed) && (!this.world.enemies[i].moveLock))) 		//Blocking version
+	for (var i=0;i<this.world.monsters.length;i++)
+	    if (this.world.monsters[i].alive)
+		if (!((this.world.monsters[i].hasActed)))// && (!this.world.monsters[i].moveLock))) 	//Non-blocking version
+		//if (!((this.world.monsters[i].hasActed) && (!this.world.monsters[i].moveLock))) 		//Blocking version
 		    allDone = false;
 	  
 	if (allDone)
 	{
-	    for (var i=0;i<this.world.numEnemies;i++)
+	    for (var i=0;i<this.world.monsters.length;i++)
 	    {
-		if (this.world.enemies[i].alive)
+		if (this.world.monsters[i].alive)
 		{
-		    this.world.enemies[i].hasActed = false;
-		    this.world.enemies[i].moveLock = false;
+		    this.world.monsters[i].hasActed = false;
+		    this.world.monsters[i].moveLock = false;
 		}
 	    }
 	    AiTurn = false;

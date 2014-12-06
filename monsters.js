@@ -128,7 +128,7 @@ Monster.prototype.moveAction = function(world,direction)
 	    this.sprite.animations.play('emattackright');
 	}
     }
-    else if ((world.isValidTarget(newTarget)) && !(world.isEnemyAt(newTarget)))
+    else if ((world.isValidTarget(newTarget)) && !(world.isMonsterAt(newTarget)))
     {
 	this.target = newTarget;
 	var t = game.add.tween(this.sprite);

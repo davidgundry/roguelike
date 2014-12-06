@@ -3,8 +3,11 @@ function Dungeon(regionSize)
     this.regionSize = regionSize * 3;
     this.mapSize = 20;
     this.roomCount = 0;
+    
     this.objects = [];
     this.enemies = [];
+    
+    this.map = [];
   
     this.array = new Array(this.regionSize+this.mapSize*3);
     for (var i=0; i<this.regionSize+this.mapSize*3;i++)
@@ -86,6 +89,7 @@ Dungeon.prototype.generateRegionDungeon = function(origin,x,y)
   this.gen(maxTries,startingRoomCount+targetRooms,origin,{top:y*this.mapSize,right:x*this.mapSize+this.mapSize,bottom:y*this.mapSize+this.mapSize,left:x*this.mapSize});
   if (this.roomCount == startingRoomCount)
     return false;
+  this.randomEnemies(10);
   return true;
 }
 
@@ -99,6 +103,52 @@ Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
     this.createFeature(rect);
     tries++;
   }
+  this.map = this.convert();
+}
+
+Dungeon.prototype.randomEnemies = function(numEnemies)
+{
+    for (var i=0;i<numEnemies;i++)
+    {
+	if (Math.random() > 0.9)
+	  this.enemies[i] = {location:{x:1,y:1},enemy:enemy.BANDIT};
+	else if (Math.random() > 0.8)
+	  this.enemies[i] = {location:{x:1,y:1},enemy:enemy.GOLEM};
+	else
+	  this.enemies[i] = {location:{x:1,y:1},enemy:enemy.ANIMAL};
+    }
+    
+    for (var i=0;i<this.enemies.length;i++)
+    {
+	var x,y;
+	var found = false;
+	var attempts = 0;
+	while ((!found) && (attempts < 10))
+	{
+	    attempts++;
+	    x = Math.floor(Math.random()*this.mapSize);
+	    y = Math.floor(Math.random()*this.mapSize);
+	    if ((this.isValidGlobalTarget({x:x,y:y})) && !(this.world.isMonsterAt({x:x,y:y})) && !(this.world.isObjectAt({x:x,y:y})))
+	      found = true;
+	}
+	if (!found)
+	{
+	    x = -1;
+	    y = -1;
+	}
+	this.enemies[i].location = {x:x,y:y};
+    }
+}
+
+Dungeon.prototype.isValidGlobalTarget = function(target)
+{
+    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
+    {
+	if (this.array[target.x][target.y]>3)
+	  if (this.array[target.x][target.y]<10)
+	      return true;
+    }
+    return false;
 }
 
 var RNR = function(low, high)
@@ -154,10 +204,10 @@ Dungeon.prototype.isAdjacent = function(location,checkTile)
 
 Dungeon.prototype.createEntrance = function(location)
 {
-  this.createObject(location,object.ENTRANCE);
+  this.addObject(location,object.ENTRANCE);
 }
 
-Dungeon.prototype.createObject = function(location,object)
+Dungeon.prototype.addObject = function(location,object)
 {
     this.objects.push({location:location,object:object});
 }
@@ -266,6 +316,7 @@ Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=
       
   this.setTile(location,floor);
   this.setTile(location,door);
+  this.enemies[0] = {location:location,enemy:enemy.BANDIT};
   this.roomCount++;
 }
 

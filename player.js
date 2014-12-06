@@ -123,7 +123,7 @@ Player.prototype.move = function()
 
 Player.prototype.attack = function(attackTarget,world)
 {
-    world.getAt(attackTarget).damage(Math.floor(Math.random()*8+1+2)); //1d8+2
+    world.getMonsterAt(attackTarget).damage(Math.floor(Math.random()*8+1+2)); //1d8+2
 }
   
 Player.prototype.input = function(cursor,world)
@@ -148,7 +148,7 @@ Player.prototype.input = function(cursor,world)
 	{
 	  world.useObjectAt(newTarget);
 	}
-	else if (world.isEnemyAt(newTarget))
+	else if (world.isMonsterAt(newTarget))
 	{
 	    this.attack(newTarget,world);
 	    this.hasActed = true;
