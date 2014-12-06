@@ -14,8 +14,7 @@ function World()
         
     this.objects = [];
     this.loot = [];
-    this.numEnemies = 5;
-    this.enemies = [];
+    this.monsters = [];
     this.configureDungeonEntrances();
     this.currentMaps = this.maps[this.currentLevel];
     
@@ -316,7 +315,10 @@ World.prototype.useObjectAt = function(target)
     var o = this.getObjectAt(target);
     if (o.object == object.ENTRANCE)
     {
-	this.switchLevel(1);
+	if (this.currentLevel == 0)
+	  this.switchLevel(1);
+	else if (this.currentLevel == 1)
+	  this.switchLevel(0);
     }
 }
 

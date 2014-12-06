@@ -4,6 +4,7 @@ function Dungeon(regionSize)
     this.mapSize = 20;
     this.roomCount = 0;
     this.objects = [];
+    this.enemies = [];
   
     this.array = new Array(this.regionSize+this.mapSize*3);
     for (var i=0; i<this.regionSize+this.mapSize*3;i++)
