@@ -1,5 +1,6 @@
-function World()
+function World(state)
 {
+    this.state = state;
     this.worldAreas = [];
     this.player = null;
 }
@@ -28,4 +29,10 @@ World.prototype.getArea = function()
 World.prototype.getLevel = function()
 {
     return this.getArea().getLevel();
+}
+
+World.prototype.changedLevel = function()
+{
+    this.state.currentLevel = this.getLevel();
+    AiTurnCount = 0;
 }

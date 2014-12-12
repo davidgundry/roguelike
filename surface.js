@@ -27,7 +27,7 @@ Surface.prototype.addObject = function(location,object)
 
 Surface.prototype.configureEnemies = function()
 {
-    for (var i=0;i<10;i++)
+    for (var i=0;i<3;i++)
     {
 	if (Math.random() > 0.9)
 	  this.enemies[i] = {location:{x:1,y:1},enemy:enemy.BANDIT};

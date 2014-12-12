@@ -14,7 +14,7 @@ WorldArea.prototype.create = function(player)
     this.levels[0] = new Surface(this,0);
     this.levels[0].initialise();
     this.levels[0].generate();
-    //this.configureDungeonEntrances();
+    this.configureDungeonEntrances();
     
     this.switchLevel(0);
     console.log("Created WorldArea");
@@ -32,17 +32,17 @@ WorldArea.prototype.configureDungeonEntrances = function()
     {
       var rx = RNR(0,0);
       var ry = RNR(0,0);
-      var inx = RNR(0,this.mapSize);
-      var iny = RNR(0,this.mapSize);
+      var inx = RNR(5,this.mapSize-5);
+      var iny = RNR(5,this.mapSize-5);
       var origin = {x:inx+rx*this.mapSize,y:iny+ry*this.mapSize};
       var loops = 0;
       while (!this.levels[1].generateRegionDungeon(origin,rx,ry))
       {
 	loops++;
-	if (loops == 100)
+	if (loops == 10)
 	  break;
       }
-      if (loops < 100)
+      if (loops < 10)
       {
 	this.levels[1].addObject(origin,object.STEPSUP);
 	this.levels[0].addObject(origin,object.STEPSDOWN);
@@ -61,8 +61,11 @@ WorldArea.prototype.switchLevel = function(level)
 {
     if ((level < this.levels.length) && (level >=0))
     {
+      if (this.getLevel() != null)
+	this.getLevel().destroy();
       this.currentLevel = level;
       this.getLevel().create(this.player);
+      this.world.changedLevel();
     }
     else
       console.log("Attempted to switch to non-existant level");

@@ -38,8 +38,10 @@ WorldLevel.prototype.create = function(player)
 
 WorldLevel.prototype.destroy = function()
 {
-    this.map.destroy();
-    this.layer.destroy();
+    if (this.map != null)
+      this.map.destroy();
+    if (this.layer != null)
+      this.layer.destroy();
     this.killAll();
 }
 
@@ -313,6 +315,7 @@ WorldLevel.prototype.createMinimap = function()
       this.minimap.destroy();
     this.minimap = game.add.sprite(640,0, bmd);
     this.minimap.anchor.setTo(0,0);
+    this.minimapLayer = game.add.sprite(640,0, bmd);
 }
 
 WorldLevel.prototype.updateMinimapLayer = function()
@@ -331,9 +334,9 @@ WorldLevel.prototype.updateMinimapLayer = function()
     var index = 26;
     bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.player.target.x+this.regionX*this.mapSize)*4,(this.player.target.y+this.regionY*this.mapSize)*4,4,4);
   }
-  if (this.minimapLayer != null)
-      this.minimapLayer.destroy();
-  this.minimapLayer = game.add.sprite(640,0, bmd);
+  //if (this.minimapLayer != null)
+  //    this.minimapLayer.destroy();
+  this.minimapLayer.loadTexture(bmd);
   this.minimapLayer.anchor.setTo(0,0);
 }
 

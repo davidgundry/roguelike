@@ -1,4 +1,4 @@
-function Monster(x,y,world)
+function Monster(x,y,level)
 {
 }
 
@@ -42,6 +42,8 @@ Monster.prototype.updateHitBar = function()
 
 Monster.prototype.damage = function(damage)
 {
+    if(this.hitBar == null)
+      this.createHitBar();
     this.hitPoints -= damage;
     if (this.hitPoints<=0)
     {
@@ -69,20 +71,13 @@ Monster.prototype.setSpritePosition = function()
     this.sprite.y = this.target.y*tileHeight+tileHeight/2;
 }
 
-Monster.prototype.move = function()
+Monster.prototype.rescaleHitBar = function(x)
 {
-    if (this.animating)
-    {
-      //this.sprite.animations.play('right');
-    }
-    else if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
-    {
-	this.moveLock = false;
-	this.sprite.animations.stop();
-    }
+  if (this.hitBar != null)
+    this.hitBar.scale.x = x;
 }
 
-Monster.prototype.moveAction = function(world,direction)
+Monster.prototype.moveAction = function(level,direction)
 {
     var newTarget = {x:this.target.x,y:this.target.y};
     if (direction == 1)
@@ -101,14 +96,14 @@ Monster.prototype.moveAction = function(world,direction)
     {
 	newTarget.x -=1;
     }
-    if (world.isObjectAt(newTarget))
+    if (level.isObjectAt(newTarget))
     {
       
     }
-    else if (world.isPlayerAt(newTarget))
+    else if (level.isPlayerAt(newTarget))
     {
 	this.animating = true;
-	world.player.damage(Math.floor(Math.random(6)+1));
+	level.player.damage(Math.floor(Math.random(6)+1));
 	this.sprite.animations.play('emattackright');
 	this.sprite.events.onAnimationComplete.add(function()
 	{
@@ -118,45 +113,50 @@ Monster.prototype.moveAction = function(world,direction)
 	if (newTarget.x > this.target.x)
 	{
 	    this.sprite.scale.x = 1;
-	    this.hitBar.scale.x = 1;
+	    this.rescaleHitBar(1);
 	    this.sprite.animations.play('emattackright');
 	}
 	else
 	{
 	    this.sprite.scale.x = -1;
-	    this.hitBar.scale.x = -1;
+	    this.rescaleHitBar(-1);
 	    this.sprite.animations.play('emattackright');
 	}
     }
-    else if ((world.isValidTarget(newTarget)) && !(world.isMonsterAt(newTarget)))
+    else if ((level.isValidTarget(newTarget)) && !(level.isMonsterAt(newTarget)))
     {
 	this.target = newTarget;
 	var t = game.add.tween(this.sprite);
 	t.to({x: this.target.x*tileWidth+tileWidth/2, y:this.target.y*tileHeight+tileHeight/2}, this.tileMoveTime /*duration of the tween (in ms)*/, Phaser.Easing.Linear.None /*easing type*/, true /*autostart?*/, 0 /*delay*/, false /*yoyo?*/);
+	t.onComplete.add(function()
+	{
+	  this.moveLock = false;
+	  this.sprite.animations.stop();
+	},this);
 	this.moveLock = true;
 	
 	if (this.target.x*tileWidth < this.sprite.x)
 	{
 	    this.sprite.animations.play('emright');
 	    this.sprite.scale.x = -1;
-	    this.hitBar.scale.x = -1;
+	    this.rescaleHitBar(-1);
 	}
 	else if (this.target.x*tileWidth > this.sprite.x)
 	{
 	    this.sprite.scale.x = 1;
-	    this.hitBar.scale.x = 1;
+	    this.rescaleHitBar(1);
 	    this.sprite.animations.play('emright');
 	}
 	else if (this.target.y*tileHeight > this.sprite.y)
 	{
 	    this.sprite.scale.x = -1;
-	    this.hitBar.scale.x = -1;
+	    this.rescaleHitBar(-1);
 	    this.sprite.animations.play('emup');
 	}
 	else if (this.target.y*tileHeight < this.sprite.y)
 	{
 	    this.sprite.scale.x = 1;
-	    this.hitBar.scale.x = 1;
+	    this.rescaleHitBar(1);
 	    this.sprite.animations.play('emup');
 	}
     } 
@@ -166,9 +166,9 @@ Monster.prototype.moveAction = function(world,direction)
 
 MonsterAnimal.prototype = new Monster();
 MonsterAnimal.prototype.constructor=MonsterAnimal;
-function MonsterAnimal(x,y,world)
+function MonsterAnimal(x,y,level)
 {
-    this.world = world;
+    this.level = level;
     this.target = {x:x,y:y};
     this.moveLock = false;
     this.hasActed = false;
@@ -192,27 +192,25 @@ function MonsterAnimal(x,y,world)
    this.sprite.animations.add('emright', [42,43,44,45], 12, true);
    this.sprite.animations.add('emup', [42,43,44,45], 12, true);
    this.sprite.frame=42;
-    
-   this.createHitBar();
 }
 
 MonsterAnimal.prototype.dropLoot = function()
 {
-    this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
+    this.level.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
 }
 
-MonsterAnimal.prototype.act = function(world)
+MonsterAnimal.prototype.act = function(level)
 {
     var direction = Math.floor(Math.random()*5)+1;
-    this.moveAction(world,direction);
+    this.moveAction(level,direction);
 }
 
 
 MonsterGolem.prototype = new Monster();
 MonsterGolem.prototype.constructor=MonsterAnimal;
-function MonsterGolem(x,y,world)
+function MonsterGolem(x,y,level)
 {
-    this.world = world;
+    this.level = level;
     this.target = {x:x,y:y};
     this.moveLock = false;
     this.hasActed = false;
@@ -231,22 +229,21 @@ function MonsterGolem(x,y,world)
     this.sprite.animations.add('emattackright', [9,10,11,12,13,0], 12, false);
     this.sprite.frame=0;
     
-   this.createHitBar();
 }
 
 MonsterGolem.prototype.dropLoot = function()
 {
     if (Math.random()>0.6)
-	this.world.addLoot(new Potion(this.target.x,this.target.y));
+	this.level.addLoot(new Potion(this.target.x,this.target.y));
     else
-	this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
+	this.level.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
 }
 
-MonsterGolem.prototype.act = function(world)
+MonsterGolem.prototype.act = function(level)
 {
     var direction = 0;
-    var xdiff = (world.player.target.x - this.target.x);
-    var ydiff = (world.player.target.y - this.target.y);
+    var xdiff = (level.player.target.x - this.target.x);
+    var ydiff = (level.player.target.y - this.target.y);
     if (Math.abs(xdiff) >= Math.abs(ydiff))
     {
 	if (xdiff > 0)
@@ -262,7 +259,7 @@ MonsterGolem.prototype.act = function(world)
 	    direction = 1;
     }
     
-    this.moveAction(world,direction);
+    this.moveAction(level,direction);
 }
 
 
@@ -270,9 +267,9 @@ MonsterGolem.prototype.act = function(world)
 
 MonsterBandit.prototype = new Monster();
 MonsterBandit.prototype.constructor=MonsterAnimal;
-function MonsterBandit(x,y,world)
+function MonsterBandit(x,y,level)
 {
-    this.world = world;
+    this.level = level;
     this.target = {x:x,y:y};
     this.moveLock = false;
     this.hasActed = false;
@@ -290,23 +287,21 @@ function MonsterBandit(x,y,world)
    this.sprite.animations.add('emup', [28,29,30,31], 12, true);
    this.sprite.frame=28;
     
-    
-   this.createHitBar();
 }
 
 MonsterBandit.prototype.dropLoot = function()
 {
     if (Math.random()>0.5)
-	this.world.addLoot(new Potion(this.target.x,this.target.y));
+	this.level.addLoot(new Potion(this.target.x,this.target.y));
     else
-	this.world.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
+	this.level.addLoot(new Coin(this.target.x,this.target.y,Math.floor(Math.random()*3+1)));
 }
 
-MonsterBandit.prototype.act = function(world)
+MonsterBandit.prototype.act = function(level)
 {
     var direction = 0;
-    var xdiff = (world.player.target.x - this.target.x);
-    var ydiff = (world.player.target.y - this.target.y);
+    var xdiff = (level.player.target.x - this.target.x);
+    var ydiff = (level.player.target.y - this.target.y);
     if (Math.abs(xdiff) >= Math.abs(ydiff))
     {
 	if (xdiff > 0)
@@ -322,5 +317,5 @@ MonsterBandit.prototype.act = function(world)
 	    direction = 1;
     }
     
-    this.moveAction(world,direction);
+    this.moveAction(level,direction);
 }

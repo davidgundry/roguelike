@@ -1,18 +1,13 @@
 function Player()
 {
     this.target = {x:10,y:10};
-
-    this.recreate();
-
     this.moveLock = false;
-    this.sprite.body.moves = false;
     this.tileMoveTime = 300;
     this.hasActed = false;
     this.animating = false;
     
     this.hitPoints = Math.floor(Math.random()*10)+10;
     this.maxHitPoints = this.hitPoints;
-    this.createHitBar();
     
     this.coins = 0;
 }
@@ -23,7 +18,6 @@ Player.prototype.recreate = function()
       this.sprite.destroy();
   
     this.sprite = game.add.sprite(this.target.x*tileWidth+tileWidth/2,this.target.y*tileHeight+tileHeight/2, 'characters');
-    game.physics.arcade.enable(this.sprite);
     this.sprite.animations.add('pright', [14,15,16,17], 12, true);
     this.sprite.animations.add('pup', [14,15,16,17], 12, true);
     this.sprite.animations.add('pattackright', [23,24,25,26,27,14], 12, false);
@@ -31,6 +25,7 @@ Player.prototype.recreate = function()
 
     this.sprite.anchor.setTo(0.5,0.5);
     game.camera.follow(this.sprite);
+    this.createHitBar();
 }
   
 Player.prototype.createHitBar = function()
@@ -97,29 +92,6 @@ Player.prototype.kill = function()
  //TODO: stub 
 }
 
-Player.prototype.move = function()
-{
-    // no blocking on player:
-    if (this.hasActed)
-    {
-	AiTurn = true;
-	this.hasActed = false;
-    }
-    if (this.animating)
-    {
-      //this.sprite.animations.play('right');
-    }
-    else if ((this.sprite.x == this.target.x*tileWidth + tileWidth/2) && (this.sprite.y == this.target.y*tileHeight+ tileHeight/2))
-    {
-	this.moveLock = false;
-	if (this.hasActed)
-	{
-	    AiTurn = true;
-	    this.hasActed = false;
-	}
-	this.sprite.animations.stop();
-    }
-}
 
 Player.prototype.attack = function(attackTarget,level)
 {
@@ -168,6 +140,8 @@ Player.prototype.input = function(cursor,level)
 	    this.sprite.events.onAnimationComplete.add(function()
 	    {
 		this.animating = false;
+		AiTurn = true;
+		this.hasActed = false;
 	    }, this);
 	    var attackSound = game.add.audio('attack');
 	    attackSound.play();
@@ -177,6 +151,13 @@ Player.prototype.input = function(cursor,level)
 	    this.target = newTarget;
 	    var t = game.add.tween(this.sprite);
 	  t.to({x: this.target.x*tileWidth+tileWidth/2, y:this.target.y*tileHeight+tileHeight/2}, this.tileMoveTime /*duration of the tween (in ms)*/, Phaser.Easing.Linear.None /*easing type*/, true /*autostart?*/, 0 /*delay*/, false /*yoyo?*/);
+	    t.onComplete.add(function()
+	    {
+	      this.moveLock = false;
+	      this.sprite.animations.stop();
+	      AiTurn = true;
+	      this.hasActed = false;
+	    },this);
 	    this.moveLock = true;
 	    this.hasActed = true;
 	    
