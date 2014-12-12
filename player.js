@@ -121,12 +121,12 @@ Player.prototype.move = function()
     }
 }
 
-Player.prototype.attack = function(attackTarget,world)
+Player.prototype.attack = function(attackTarget,level)
 {
-    world.getMonsterAt(attackTarget).damage(Math.floor(Math.random()*8+1+2)); //1d8+2
+    level.getMonsterAt(attackTarget).damage(Math.floor(Math.random()*8+1+2)); //1d8+2
 }
   
-Player.prototype.input = function(cursor,world)
+Player.prototype.input = function(cursor,level)
 {
     var pressedKey = true;
     var newTarget = {x:0,y:0};
@@ -144,13 +144,13 @@ Player.prototype.input = function(cursor,world)
     
     if (pressedKey)
     {
-	if (world.isObjectAt(newTarget))
+	if (level.isObjectAt(newTarget))
 	{
-	  world.useObjectAt(newTarget);
+	  level.useObjectAt(newTarget);
 	}
-	else if (world.isMonsterAt(newTarget))
+	else if (level.isMonsterAt(newTarget))
 	{
-	    this.attack(newTarget,world);
+	    this.attack(newTarget,level);
 	    this.hasActed = true;
 	    this.animating = true;
 	    if (newTarget.x > this.target.x)
@@ -172,7 +172,7 @@ Player.prototype.input = function(cursor,world)
 	    var attackSound = game.add.audio('attack');
 	    attackSound.play();
 	}
-	else if (world.isValidTarget(newTarget))
+	else if (level.isValidTarget(newTarget))
 	{
 	    this.target = newTarget;
 	    var t = game.add.tween(this.sprite);
@@ -180,9 +180,9 @@ Player.prototype.input = function(cursor,world)
 	    this.moveLock = true;
 	    this.hasActed = true;
 	    
-	    if (world.isLootAt(newTarget))
+	    if (level.isLootAt(newTarget))
 	    {
-		var loot = world.getLootAt(newTarget);
+		var loot = level.getLootAt(newTarget);
 		for (var i=0;i<loot.length;i++)
 		  loot[i].pickedUp(this);
 	    }
@@ -212,16 +212,16 @@ Player.prototype.input = function(cursor,world)
 		this.sprite.animations.play('pup');
 	    }
 	}
-	else if (world.isOffMap(newTarget))
+	else if (level.isOffMap(newTarget))
 	{
-	    if (world.isOffRegionRight(newTarget))
-	      world.changeRegionRight();
-	    if (world.isOffRegionLeft(newTarget))
-	      world.changeRegionLeft();
-	    if (world.isOffRegionTop(newTarget))
-	      world.changeRegionUp();
-	    if (world.isOffRegionBottom(newTarget))
-	      world.changeRegionDown();
+	    if (level.isOffRegionRight(newTarget))
+	      level.changeRegionRight();
+	    if (level.isOffRegionLeft(newTarget))
+	      level.changeRegionLeft();
+	    if (level.isOffRegionTop(newTarget))
+	      level.changeRegionUp();
+	    if (level.isOffRegionBottom(newTarget))
+	      level.changeRegionDown();
 	}
 	
     }

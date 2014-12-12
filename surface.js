@@ -1,23 +1,17 @@
-function Surface(world)
+Surface.prototype = new WorldLevel();
+Surface.constructor = Surface;
+function Surface(worldArea,levelID) {WorldLevel.call(this,worldArea,levelID);}
+
+Surface.prototype.initialise = function()
 {
-    this.world = world;
-    this.array = [];
-    this.map = [];
-    this.mapSize = 20;
   
-    this.enemies = [];
-    this.numEnemies = 5;
-            
-    this.objects = [];
-    this.loot = [];
 }
 
 Surface.prototype.generate = function()
 {
     this.generateHeightMap();
-    this.configureDungeonEntrances();
     this.configureEnemies();
-    this.map = this.array;
+    this.levelMap = this.array;
 }
 
 var enemy = {
@@ -31,39 +25,9 @@ Surface.prototype.addObject = function(location,object)
     this.objects.push({location:location,object:object});
 }
 
-Surface.prototype.configureDungeonEntrances = function()
-{
-  if (this.world.levels[1] == null)
-  {
-    this.world.levels[1] = new Dungeon(this.mapSize);
-  
-    var numEntrances = 1;
-    for (var i=0;i<numEntrances;i++)
-    {
-      var rx = RNR(0,0);
-      var ry = RNR(0,0);
-      var inx = RNR(0,this.mapSize);
-      var iny = RNR(0,this.mapSize);
-      var origin = {x:inx+rx*this.mapSize,y:iny+ry*this.mapSize};
-      var loops = 0;
-      while (!this.world.levels[1].generateRegionDungeon(origin,rx,ry))
-      {
-	loops++;
-	if (loops == 100)
-	  break;
-      }
-      if (loops < 100)
-      {
-	this.world.levels[1].createEntrance(origin);
-	this.addObject(origin,object.ENTRANCE);
-      }
-    }
-  }
-}
-
 Surface.prototype.configureEnemies = function()
 {
-    for (var i=0;i<this.numEnemies;i++)
+    for (var i=0;i<10;i++)
     {
 	if (Math.random() > 0.9)
 	  this.enemies[i] = {location:{x:1,y:1},enemy:enemy.BANDIT};
@@ -83,7 +47,7 @@ Surface.prototype.configureEnemies = function()
 	    attempts++;
 	    x = Math.floor(Math.random()*this.mapSize);
 	    y = Math.floor(Math.random()*this.mapSize);
-	    if ((this.isValidGlobalTarget({x:x,y:y})) && !(this.world.isMonsterAt({x:x,y:y})) && !(this.world.isObjectAt({x:x,y:y})))
+	    if ((this.isValidGlobalTarget({x:x,y:y})) && !(this.isMonsterAt({x:x,y:y})) && !(this.isObjectAt({x:x,y:y})))
 	      found = true;
 	}
 	if (!found)

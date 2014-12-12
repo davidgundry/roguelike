@@ -1,18 +1,13 @@
-function Dungeon(regionSize)
+Dungeon.prototype = new WorldLevel();
+Dungeon.constructor = Dungeon;
+function Dungeon(worldArea,levelID) {WorldLevel.call(this,worldArea,levelID);}
+
+Dungeon.prototype.initialise = function()
 {
-    this.regionSize = regionSize * 3;
-    this.mapSize = 20;
-    this.roomCount = 0;
-    
-    this.objects = [];
-    this.enemies = [];
-    
-    this.map = [];
-  
     this.array = new Array(this.regionSize+this.mapSize*3);
     for (var i=0; i<this.regionSize+this.mapSize*3;i++)
     {
-	this.array[i] = new Array(regionSize+this.mapSize*3);
+	this.array[i] = new Array(this.regionSize+this.mapSize*3);
 	for (var j=0; j<this.regionSize+this.mapSize*3;j++)
 	{
 	    this.array[i][j] = tile.UNUSED;
@@ -56,7 +51,8 @@ var tile = {
     }
     
 var object = {
-      ENTRANCE : "entrance"
+      STEPSUP : "stepsup",
+      STEPSDOWN : "stepsdown"
     }
     
 var direction = {
@@ -103,7 +99,7 @@ Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
     this.createFeature(rect);
     tries++;
   }
-  this.map = this.convert();
+  this.levelMap = this.convert();
 }
 
 Dungeon.prototype.randomEnemies = function(numEnemies)
@@ -200,11 +196,6 @@ Dungeon.prototype.isAdjacent = function(location,checkTile)
     if (this.getCell(location.x-1,location.y) == checkTile)
       return true;
     return false;
-}
-
-Dungeon.prototype.createEntrance = function(location)
-{
-  this.addObject(location,object.ENTRANCE);
 }
 
 Dungeon.prototype.addObject = function(location,object)

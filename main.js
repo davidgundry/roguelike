@@ -9,61 +9,63 @@ var mainState = {
     {
 	this.world = new World();
 	this.player = new Player();
-	this.world.player = this.player;
-	game.world.setBounds(0,0,this.world.mapSize*tileWidth,this.world.mapSize*tileHeight);
+	game.world.setBounds(0,0,20*tileWidth,20*tileHeight);
 
 	game.input.keyboard.addKeyCapture([Phaser.Keyboard.UP,Phaser.Keyboard.DOWN,Phaser.Keyboard.LEFT,Phaser.Keyboard.RIGHT]);
 	this.cursor = game.input.keyboard.createCursorKeys();
+	this.world.create(this.player);
+	this.world.start();
     },
 
     update: function()
     {
-	if (loopCounter == 10)
+	var currentLevel = this.world.getLevel();
+	if (loopCounter == 20)
 	{
-	  this.world.updateMinimapLayer();
+	  currentLevel.updateMinimapLayer();
 	  loopCounter = 0;
 	}
 	else
 	  loopCounter++;
-	for (var i=0;i<this.world.monsters.length;i++)
-	    if (this.world.monsters[i].alive)
-		this.world.monsters[i].move();
+	for (var i=0;i<currentLevel.monsters.length;i++)
+	    if (currentLevel.monsters[i].alive)
+		currentLevel.monsters[i].move();
 	  
 	if (!AiTurn)
 	{
 	    this.player.move();
 	    if ((!this.player.moveLock) && (!this.player.hasActed)  && (!this.player.animating))
-		this.player.input(this.cursor,this.world);
+		this.player.input(this.cursor,currentLevel);
 	}
 	else
-	    this.runAiTurn();
+	    this.runAiTurn(currentLevel);
     },
 
-    runAiTurn: function()
+    runAiTurn: function(currentLevel)
     {    
-	for (var i=0;i<this.world.monsters.length;i++)
+	for (var i=0;i<currentLevel.monsters.length;i++)
 	{
-	    if (this.world.monsters[i].alive)
-	      if (!this.world.monsters[i].moveLock)
-		  if (!this.world.monsters[i].hasActed)
-		      this.world.monsters[i].act(this.world);
+	    if (currentLevel.monsters[i].alive)
+	      if (!currentLevel.monsters[i].moveLock)
+		  if (!currentLevel.monsters[i].hasActed)
+		      currentLevel.monsters[i].act(currentLevel);
 	}
 	
 	var allDone = true;
-	for (var i=0;i<this.world.monsters.length;i++)
-	    if (this.world.monsters[i].alive)
-		if (!((this.world.monsters[i].hasActed)))// && (!this.world.monsters[i].moveLock))) 	//Non-blocking version
-		//if (!((this.world.monsters[i].hasActed) && (!this.world.monsters[i].moveLock))) 		//Blocking version
+	for (var i=0;i<currentLevel.monsters.length;i++)
+	    if (currentLevel.monsters[i].alive)
+		if (!((currentLevel.monsters[i].hasActed)))// && (!currentLevel.monsters[i].moveLock))) 	//Non-blocking version
+		//if (!((currentLevel.monsters[i].hasActed) && (!currentLevel.monsters[i].moveLock))) 		//Blocking version
 		    allDone = false;
 	  
 	if (allDone)
 	{
-	    for (var i=0;i<this.world.monsters.length;i++)
+	    for (var i=0;i<currentLevel.monsters.length;i++)
 	    {
-		if (this.world.monsters[i].alive)
+		if (currentLevel.monsters[i].alive)
 		{
-		    this.world.monsters[i].hasActed = false;
-		    this.world.monsters[i].moveLock = false;
+		    currentLevel.monsters[i].hasActed = false;
+		    currentLevel.monsters[i].moveLock = false;
 		}
 	    }
 	    AiTurn = false;
