@@ -57,9 +57,15 @@ var mainState = {
 	    var allDone = true;
 	    for (var i=0;i<this.currentLevel.monsters.length;i++)
 		if (this.currentLevel.monsters[i].alive)
+		{
 		    if (!((this.currentLevel.monsters[i].hasActed)))// && (!this.currentLevel.monsters[i].moveLock))) 	//Non-blocking version
 		    //if (!((this.currentLevel.monsters[i].hasActed) && (!this.currentLevel.monsters[i].moveLock))) 		//Blocking version
 			allDone = false;
+		}
+		else
+		{
+		    this.currentLevel.monsters.splice(i,1);
+		}
 	      
 	    if (allDone)
 	    {
