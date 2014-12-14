@@ -27,11 +27,11 @@ WorldArea.prototype.configureDungeonEntrances = function()
     this.levels[1] = new Dungeon(this,1);
     this.levels[1].initialise();
   
-    var numEntrances = 1;
+    var numEntrances = 5;
     for (var i=0;i<numEntrances;i++)
     {
-      var rx = RNR(0,0);
-      var ry = RNR(0,0);
+      var rx = RNR(0,2);
+      var ry = RNR(0,2);
       var inx = RNR(5,this.mapSize-5);
       var iny = RNR(5,this.mapSize-5);
       var origin = {x:inx+rx*this.mapSize,y:iny+ry*this.mapSize};
@@ -61,9 +61,13 @@ WorldArea.prototype.switchLevel = function(level)
 {
     if ((level < this.levels.length) && (level >=0))
     {
+      var rx = this.getLevel().regionX;
+      var ry = this.getLevel().regionY;
       if (this.getLevel() != null)
 	this.getLevel().destroy();
       this.currentLevel = level;
+      this.getLevel().regionX = rx;
+      this.getLevel().regionY = ry;
       this.getLevel().create(this.player);
       this.world.changedLevel();
     }

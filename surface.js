@@ -27,7 +27,7 @@ Surface.prototype.addObject = function(location,object)
 
 Surface.prototype.configureEnemies = function()
 {
-    for (var i=0;i<3;i++)
+    for (var i=0;i<10;i++)
     {
 	if (Math.random() > 0.9)
 	  this.enemies[i] = {location:{x:1,y:1},enemy:enemy.BANDIT};
@@ -45,9 +45,9 @@ Surface.prototype.configureEnemies = function()
 	while ((!found) && (attempts < 10))
 	{
 	    attempts++;
-	    x = Math.floor(Math.random()*this.mapSize);
-	    y = Math.floor(Math.random()*this.mapSize);
-	    if ((this.isValidGlobalTarget({x:x,y:y})) && !(this.isMonsterAt({x:x,y:y})) && !(this.isObjectAt({x:x,y:y})))
+	    x = Math.floor(Math.random()*this.mapSize*3);
+	    y = Math.floor(Math.random()*this.mapSize*3);
+	    if ((this.isValidLocation({x:x,y:y})) && !(this.isMonsterAtLocation({x:x,y:y})) && !(this.isObjectAtLocation({x:x,y:y})))
 	      found = true;
 	}
 	if (!found)
@@ -59,9 +59,9 @@ Surface.prototype.configureEnemies = function()
     }
 }
 
-Surface.prototype.isValidGlobalTarget = function(target)
+Surface.prototype.isValidLocation = function(target)
 {
-    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
+    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize*3) && (target.y<this.mapSize*3))
     {
 	if (this.array[target.x][target.y]>3)
 	  if (this.array[target.x][target.y]<10)

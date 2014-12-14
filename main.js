@@ -41,7 +41,7 @@ var mainState = {
     runAiTurn: function()
     {    
       AiTurnCount++;
-      if (AiTurnCount == this.currentLevel.monsters.length)
+      if (AiTurnCount >= this.currentLevel.monsters.length)
 	AiTurnCount = 0;
       
       if (AiTurnCount < this.currentLevel.monsters.length)
@@ -75,6 +75,8 @@ var mainState = {
 	    }
 	  }
       }
+      else
+	AiTurn = false;
     },
 
     render: function () {   

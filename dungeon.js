@@ -85,7 +85,7 @@ Dungeon.prototype.generateRegionDungeon = function(origin,x,y)
   this.gen(maxTries,startingRoomCount+targetRooms,origin,{top:y*this.mapSize,right:x*this.mapSize+this.mapSize,bottom:y*this.mapSize+this.mapSize,left:x*this.mapSize});
   if (this.roomCount == startingRoomCount)
     return false;
-  this.randomEnemies(10);
+  //this.randomEnemies(10);
   return true;
 }
 
@@ -102,6 +102,7 @@ Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
   this.levelMap = this.convert();
 }
 
+/* Doesn't seem to work?*/
 Dungeon.prototype.randomEnemies = function(numEnemies)
 {
     for (var i=0;i<numEnemies;i++)
@@ -307,7 +308,7 @@ Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=
       
   this.setTile(location,floor);
   this.setTile(location,door);
-  this.enemies[0] = {location:location,enemy:enemy.BANDIT};
+  this.enemies.push({location:location,enemy:enemy.BANDIT});
   this.roomCount++;
 }
 

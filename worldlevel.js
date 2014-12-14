@@ -30,7 +30,7 @@ WorldLevel.prototype.create = function(player)
     {
       this.player = player;
       this.createCurrentRegion();
-      console.log("Created WorldLevel");
+      console.log("Created WorldLevel with " + this.monsters.length + " monsters out of " + this.enemies.length + " enemies.");
     }
     else
       console.log("Cannot create a WorldLevel with a null worldArea");
@@ -49,8 +49,12 @@ WorldLevel.prototype.createObjects = function()
 {
   for (var i=0;i<this.objects.length;i++)
   {
-      var objectSprite = game.add.sprite(this.objects[i].location.x*tileWidth,this.objects[i].location.y*tileHeight,'objects');
-      objectSprite.frame=73;
+    if (Math.floor(this.objects[i].location.x / this.mapSize) == this.regionX)
+      if (Math.floor(this.objects[i].location.y / this.mapSize) == this.regionY)
+      {
+	var objectSprite = game.add.sprite(this.objects[i].location.x%this.mapSize*tileWidth,this.objects[i].location.y%this.mapSize*tileHeight,'objects');
+	objectSprite.frame=73;
+      }
   }
 }
 
@@ -210,18 +214,20 @@ WorldLevel.prototype.createMonsters = function()
     {
 	if (this.enemies[i].location.x != -1)
 	{
-	    switch (this.enemies[i].enemy)
-	    {
-	      case enemy.BANDIT:
-		this.monsters[i] = new MonsterBandit(this.enemies[i].location.x,this.enemies[i].location.y,this);
-		break;
-	      case enemy.GOLEM:
-		this.monsters[i] = new MonsterGolem(this.enemies[i].location.x,this.enemies[i].location.y,this);
-		break;
-	      case enemy.ANIMAL:
-		this.monsters[i] = new MonsterAnimal(this.enemies[i].location.x,this.enemies[i].location.y,this);
-		break;
-	    }
+	  if (Math.floor(this.enemies[i].location.x / this.mapSize) == this.regionX)
+		if (Math.floor(this.enemies[i].location.y / this.mapSize) == this.regionY)
+		    switch (this.enemies[i].enemy)
+		    {
+			case enemy.BANDIT:
+			  this.monsters.push(new MonsterBandit(this.enemies[i].location.x%this.mapSize,this.enemies[i].location.y%this.mapSize,this));
+			  break;
+			case enemy.GOLEM:
+			  this.monsters.push(new MonsterGolem(this.enemies[i].location.x%this.mapSize,this.enemies[i].location.y%this.mapSize,this));
+			  break;
+			case enemy.ANIMAL:
+			  this.monsters.push(new MonsterAnimal(this.enemies[i].location.x%this.mapSize,this.enemies[i].location.y%this.mapSize,this));
+			  break;
+		    }
 	}
     }
 }
@@ -236,11 +242,32 @@ WorldLevel.prototype.isMonsterAt = function(target)
     return false;
 }
 
+WorldLevel.prototype.isMonsterAtLocation = function(location)
+{
+    for (var i=0;i<this.monsters.length;i++)
+    {
+	if ((this.monsters[i].location.x+this.regionX*this.mapSize == location.x) && (this.monsters[i].target.y+this.regionY*this.mapSize == location.y))
+	    return true;
+    }
+    return false;
+}
+
+
 WorldLevel.prototype.isObjectAt = function(target)
 {
     for (var i=0;i<this.objects.length;i++)
     {
-	if ((this.objects[i].location.x == target.x) && (this.objects[i].location.y == target.y))
+	if ((this.objects[i].location.x == target.x+(this.mapSize*this.regionX)) && (this.objects[i].location.y == target.y+(this.mapSize*this.regionY)))
+	    return true;
+    }
+    return false;
+}
+
+WorldLevel.prototype.isObjectAtLocation = function(location)
+{
+    for (var i=0;i<this.objects.length;i++)
+    {
+	if ((this.objects[i].location.x == location.x) && (this.objects[i].location.y == location.y))
 	    return true;
     }
     return false;
@@ -251,7 +278,7 @@ WorldLevel.prototype.getObjectAt = function(target)
     var foundObject;
     for (var i=0;i<this.objects.length;i++)
     {
-	if ((this.objects[i].location.x == target.x) && (this.objects[i].location.y == target.y))
+	if ((this.objects[i].location.x == target.x+(this.mapSize*this.regionX)) && (this.objects[i].location.y == target.y+(this.mapSize*this.regionY)))
 	    return this.objects[i];
     }
     return null;
@@ -321,6 +348,14 @@ WorldLevel.prototype.createMinimap = function()
 WorldLevel.prototype.updateMinimapLayer = function()
 {
   var bmd = game.add.bitmapData(240, 240);
+  if (this.objects != null)
+  {
+    for (var k=0;k<this.objects.length;k++)
+    {
+      var index = 0;
+      bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.objects[k].location.x)*4,(this.objects[k].location.y)*4,4,4);
+    }
+  }
   if (this.monsters != null)
   {
     for (var k=0;k<this.monsters.length;k++)
