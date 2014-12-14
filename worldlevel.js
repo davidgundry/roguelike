@@ -42,7 +42,36 @@ WorldLevel.prototype.destroy = function()
       this.map.destroy();
     if (this.layer != null)
       this.layer.destroy();
+    this.updateEnemyPositions();
     this.killAll();
+}
+
+WorldLevel.prototype.updateEnemyPositions = function()
+{
+    var newEnemies = []
+    for (var i=0;i<this.enemies.length;i++)
+    {
+      if (!this.isLocationInRegion(this.enemies[i].location,this.regionX,this.regionY))
+	newEnemies.push(this.enemies[i]);
+    }
+    for (var i=0;i<this.monsters.length;i++)
+    {
+      newEnemies.push({location:this.targetToLocation(this.monsters[i].target),enemy:this.monsters[i].enemy});
+    }
+    this.enemies = newEnemies;
+}
+
+WorldLevel.prototype.isLocationInRegion = function(location,rx,ry)
+{
+    if((location.x >= rx*this.mapSize) && (location.x < (rx+1)*this.mapSize))
+      if((location.y >= ry*this.mapSize) && (location.y < (ry+1)*this.mapSize))
+	return true;
+    return false;
+}
+
+WorldLevel.prototype.targetToLocation = function(target)
+{
+    return {x:target.x+this.regionX*this.mapSize,y:target.y+this.regionY*this.mapSize};
 }
 
 WorldLevel.prototype.createObjects = function()
@@ -62,12 +91,6 @@ WorldLevel.prototype.createCurrentRegion = function()
 {
   if (this.player != null)
   {
-    if (this.map != null)
-    {
-      this.map.destroy();
-      this.layer.destroy();
-    }
-    this.killAll();
     this.map = game.add.tilemap();
     this.layer = this.map.create('layer', this.mapSize, this.mapSize, 32, 32);
     this.layer.width=tileWidth*this.mapSize;
@@ -105,6 +128,7 @@ WorldLevel.prototype.changeRegionRight = function()
 {
   if (this.regionX < 2)
   {
+      this.destroy();
       this.regionX++;
       this.createCurrentRegion();
       this.player.target.x = 0;
@@ -116,6 +140,7 @@ WorldLevel.prototype.changeRegionLeft = function()
 {
   if (this.regionX > 0)
   {
+      this.destroy();
       this.regionX--;
       this.createCurrentRegion();
       this.player.target.x = this.mapSize;
@@ -127,6 +152,7 @@ WorldLevel.prototype.changeRegionUp = function()
 {
   if (this.regionY > 0)
   {
+      this.destroy();
       this.regionY--;
       this.createCurrentRegion();
       this.player.target.y = this.mapSize;
@@ -138,6 +164,7 @@ WorldLevel.prototype.changeRegionDown = function()
 {
   if (this.regionY < 2)
   {
+      this.destroy();
       this.regionY++;
       this.createCurrentRegion();
       this.player.target.y = 0;
@@ -320,6 +347,18 @@ WorldLevel.prototype.isValidTarget = function(target)
     {
 	if (this.levelMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
 	  if (this.levelMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
+	      return true;
+    }
+    return false;
+}
+
+
+WorldLevel.prototype.isValidLocation = function(target)
+{
+    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
+    {
+	if (this.array[target.x][target.y]>3)
+	  if (this.array[target.x][target.y]<10)
 	      return true;
     }
     return false;

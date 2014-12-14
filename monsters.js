@@ -1,3 +1,9 @@
+var enemy = {
+      BANDIT: "bandit",
+      GOLEM: "golem",
+      ANIMAL: "animal"
+}
+
 function Monster(x,y,level)
 {
 }
@@ -168,6 +174,7 @@ MonsterAnimal.prototype = new Monster();
 MonsterAnimal.prototype.constructor=MonsterAnimal;
 function MonsterAnimal(x,y,level)
 {
+    this.enemy = enemy.ANIMAL;
     this.level = level;
     this.target = {x:x,y:y};
     this.moveLock = false;
@@ -210,6 +217,7 @@ MonsterGolem.prototype = new Monster();
 MonsterGolem.prototype.constructor=MonsterAnimal;
 function MonsterGolem(x,y,level)
 {
+    this.enemy = enemy.GOLEM;
     this.level = level;
     this.target = {x:x,y:y};
     this.moveLock = false;
@@ -269,6 +277,7 @@ MonsterBandit.prototype = new Monster();
 MonsterBandit.prototype.constructor=MonsterAnimal;
 function MonsterBandit(x,y,level)
 {
+    this.enemy = enemy.BANDIT;
     this.level = level;
     this.target = {x:x,y:y};
     this.moveLock = false;

@@ -14,12 +14,6 @@ Surface.prototype.generate = function()
     this.levelMap = this.array;
 }
 
-var enemy = {
-      BANDIT: "bandit",
-      GOLEM: "golem",
-      ANIMAL: "animal"
-}
-
 Surface.prototype.addObject = function(location,object)
 {
     this.objects.push({location:location,object:object});

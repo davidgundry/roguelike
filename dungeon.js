@@ -1,3 +1,27 @@
+var tile = {
+      NONE : "none",
+      WALL : "wall",
+      FLOOR : "floor",
+      UNUSED : "unused",
+      DOOR : "door",
+      CORRIDOR : "corridor",
+      ROOMWALL : "roomwall",
+      CORRIDORWALL : "corridorwall"
+    }
+    
+var object = {
+      STEPSUP : "stepsup",
+      STEPSDOWN : "stepsdown"
+    }
+    
+var direction = {
+      NORTH : "north",
+      SOUTH : "south",
+      EAST : "east",
+      WEST : "west"
+    }
+
+
 Dungeon.prototype = new WorldLevel();
 Dungeon.constructor = Dungeon;
 function Dungeon(worldArea,levelID) {WorldLevel.call(this,worldArea,levelID);}
@@ -33,7 +57,7 @@ Dungeon.prototype.convertTile = function(t)
 {
   if (t==tile.FLOOR)
     return 5;
-  if (t==tile.WALL)
+  if ((t==tile.WALL) || (t==tile.CORRIDORWALL) || (t==tile.ROOMWALL))
     return 11;
   if (t==tile.UNUSED)
     return 0;
@@ -42,37 +66,17 @@ Dungeon.prototype.convertTile = function(t)
   return 0;
 }
 
-var tile = {
-      WALL : "wall",
-      FLOOR : "floor",
-      UNUSED : "unused",
-      DOOR : "door",
-      CORRIDOR : "corridor"
-    }
-    
-var object = {
-      STEPSUP : "stepsup",
-      STEPSDOWN : "stepsdown"
-    }
-    
-var direction = {
-      NORTH : "north",
-      SOUTH : "south",
-      EAST : "east",
-      WEST : "west"
-    }
 
-Dungeon.prototype.generate = function(origin)
+Dungeon.prototype.generateAreaDungeon = function(origin)
 {
-  var maxTries = 100;
   var targetRooms = 20;
-  this.gen(maxTries,targetRooms,origin,{top:0,right:this.regionSize-1,bottom:this.regionSize-1,left:0});
+  this.generateDenseDungeon(origin,{top:0,right:this.regionSize-1,bottom:this.regionSize-1,left:0},targetRooms,this.createRoomCallback);
 }
 
 /*
  * Generates a dungeon within a single region area. Origin MUST be within region!
  */
-Dungeon.prototype.generateRegionDungeon = function(origin,x,y)
+Dungeon.prototype.generateRegionDungeon = function(origin,x,y,type=this.randomDungeonType())
 {
   var startingRoomCount = this.roomCount;
   if ((origin.x < x*this.mapSize) || (origin.y*this.mapSize < y) || (origin.x > (x+1)*this.mapSize) || (origin.y > (y+1)*this.mapSize))
@@ -80,26 +84,109 @@ Dungeon.prototype.generateRegionDungeon = function(origin,x,y)
     console.log("origin must be within region!");
     return false;
   }
-  var targetRooms = RNR(4,8);
-  var maxTries = 1000;
-  this.gen(maxTries,startingRoomCount+targetRooms,origin,{top:y*this.mapSize,right:x*this.mapSize+this.mapSize,bottom:y*this.mapSize+this.mapSize,left:x*this.mapSize});
+  this.generateX(type,origin,{top:y*this.mapSize,right:x*this.mapSize+this.mapSize,bottom:y*this.mapSize+this.mapSize,left:x*this.mapSize});
+  
   if (this.roomCount == startingRoomCount)
     return false;
-  //this.randomEnemies(10);
   return true;
 }
 
-Dungeon.prototype.gen = function(maxTries,targetRooms,origin,rect)
+dungeonTypes = {DENSE: "dense",
+		LABYRINTH: "labyrinth",
+		HALO: "halo"
+};
+
+Dungeon.prototype.randomDungeonType = function()
 {
-  this.createRoom(origin,direction.NORTH,rect);
-  this.setTile(origin,tile.WALL);
+    return dungeonTypes.HALO;
+    var pick = RNR(0,Object.keys(dungeonTypes).length);
+    var key = Object.keys(dungeonTypes)[pick];
+    return dungeonTypes[key];
+}
+
+Dungeon.prototype.generateX = function(type,origin,rect)
+{
+  if (type == dungeonTypes.DENSE)
+    this.generateDenseDungeon(origin,rect,this.createRoomCallback);
+  else if (type == dungeonTypes.LABYRINTH)
+    this.generateLabyrinthDungeon(origin,rect);
+  else if (type == dungeonTypes.HALO)
+    this.generateHaloDungeon(origin,rect);
+}
+
+Dungeon.prototype.createRoomCallback = function(scope,location,width,height,direction,offset)
+{
+    scope.enemies.push({location:location,enemy:enemy.BANDIT});
+}
+
+
+
+Dungeon.prototype.generateDenseDungeon = function(origin,rect,roomCallback=null,targetRooms=RNR(4,8)+this.roomCount,maxTries=1000)
+{
+  if (this.createRoom(origin,direction.NORTH,rect))
+    this.setTile(origin,tile.WALL);
+  else
+    return false;
+  
   var tries = 0;
   while ((this.roomCount < targetRooms) && (tries < maxTries))
   {
-    this.createFeature(rect);
+    var locD = this.pickWallDirection(rect);
+    if (locD != null)
+      this.createRoom(locD.location,locD.direction,rect,roomCallback);
     tries++;
   }
   this.levelMap = this.convert();
+  return true;
+}
+
+Dungeon.prototype.generateLabyrinthDungeon = function(origin,rect,roomCallback=null,targetRooms=RNR(15,25)+this.roomCount,maxTries=1000)
+{
+  if (this.createRoom(origin,direction.NORTH,rect,roomCallback,3,3,tile.FLOOR,tile.FLOOR))
+    this.setTile(origin,tile.WALL);
+  else
+    return false;
+  
+  var tries = 0;
+  while ((this.roomCount < targetRooms) && (tries < maxTries))
+  {
+    var locD = this.pickWallDirection(rect);
+    if (locD != null)
+      this.createRoom(locD.location,locD.direction,rect,roomCallback,3,3,tile.FLOOR,tile.FLOOR);
+    tries++;
+  }
+  this.levelMap = this.convert();
+  return true;
+}
+
+Dungeon.prototype.generateHaloDungeon = function(origin,rect,roomCallback=null,targetRooms=RNR(15,20)+this.roomCount,maxTries=1000)
+{
+  if (this.createRoom(origin,direction.NORTH,rect,roomCallback,3,3,tile.FLOOR,tile.FLOOR,tile.CORRIDORWALL))
+    this.setTile(origin,tile.CORRIDORWALL);
+  else
+    return false;
+  
+  var tries = 0;
+  while ((this.roomCount < targetRooms) && (tries < maxTries))
+  {
+    var locD = this.pickWallDirection(rect,tile.FLOOR,tile.DOOR,tile.CORRIDORWALL);
+    if (locD != null)
+      this.createRoom(locD.location,locD.direction,rect,roomCallback,3,3,tile.FLOOR,tile.FLOOR,tile.CORRIDORWALL);
+    tries++;
+  }
+  
+  var tries = 0;
+  var haloRoomTarget = RNR(5,8);
+  while ((this.roomCount < targetRooms+haloRoomTarget) && (tries < maxTries))
+  {
+    var locD = this.pickWallDirection(rect,tile.FLOOR,tile.DOOR,tile.CORRIDORWALL);
+    if (locD != null)
+	this.createRoom(locD.location,locD.direction,rect,roomCallback,RNR(4,6),RNR(4,6),tile.FLOOR,tile.DOOR,tile.ROOMWALL);
+    tries++;
+  }
+  
+  this.levelMap = this.convert();
+  return true;
 }
 
 /* Doesn't seem to work?*/
@@ -125,7 +212,7 @@ Dungeon.prototype.randomEnemies = function(numEnemies)
 	    attempts++;
 	    x = Math.floor(Math.random()*this.mapSize);
 	    y = Math.floor(Math.random()*this.mapSize);
-	    if ((this.isValidGlobalTarget({x:x,y:y})) && !(this.world.isMonsterAt({x:x,y:y})) && !(this.world.isObjectAt({x:x,y:y})))
+	    if ((this.isValidLocation({x:x,y:y})) && !(this.world.isMonsterAt({x:x,y:y})) && !(this.world.isObjectAt({x:x,y:y})))
 	      found = true;
 	}
 	if (!found)
@@ -137,16 +224,6 @@ Dungeon.prototype.randomEnemies = function(numEnemies)
     }
 }
 
-Dungeon.prototype.isValidGlobalTarget = function(target)
-{
-    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
-    {
-	if (this.array[target.x][target.y]>3)
-	  if (this.array[target.x][target.y]<10)
-	      return true;
-    }
-    return false;
-}
 
 var RNR = function(low, high)
 {
@@ -204,45 +281,38 @@ Dungeon.prototype.addObject = function(location,object)
     this.objects.push({location:location,object:object});
 }
 
-Dungeon.prototype.createFeature = function(rect)
+Dungeon.prototype.pickWallDirection = function(rect,floorTile=tile.FLOOR,doorTile=tile.DOOR,wallTile=tile.WALL,maxTries=100)
 {
-  var maxTries = 100;
   for (var i=0;i<maxTries;i++)
   {
     var location = {x:RNR(rect.left,rect.right),y:RNR(rect.top,rect.bottom)};
-    if (this.getTile(location) == tile.WALL)
+    if (this.getTile(location) == wallTile)
     {
-      if (!this.isAdjacent(location,tile.DOOR))
+      if (!this.isAdjacent(location,doorTile))
       {
-	if (this.getCell(location.x,location.y-1) == tile.FLOOR)
-	{
-	  this.createRoom(location,direction.SOUTH,rect);
-	  break;
-	}
-	else if (this.getCell(location.x,location.y+1) == tile.FLOOR)
-	{
-	  this.createRoom(location,direction.NORTH,rect);
-	  break;
-	}
-	else if (this.getCell(location.x-1,location.y) == tile.FLOOR)
-	{
-	  this.createRoom(location,direction.EAST,rect);
-	  break;
-	}
-	else if (this.getCell(location.x+1,location.y) == tile.FLOOR)
-	{
-	  this.createRoom(location,direction.WEST,rect);
-	  break;
-	}
+	if (this.getCell(location.x,location.y-1) == floorTile)
+	  return {location:location,direction:direction.SOUTH};
+	else if (this.getCell(location.x,location.y+1) == floorTile)
+	  return {location:location,direction:direction.NORTH};
+	else if (this.getCell(location.x-1,location.y) == floorTile)
+	  return {location:location,direction:direction.EAST};
+	else if (this.getCell(location.x+1,location.y) == floorTile)
+	  return {location:location,direction:direction.WEST};
       }
     }
   }
+  return null;
 }
 
-Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=tile.DOOR,wall=tile.WALL)
+Dungeon.prototype.isWall = function(t)
 {
-  var width = RNR(4,8);
-  var height = RNR(4,8);
+  if ((t==tile.WALL) || (t==tile.CORRIDORWALL) || (t==tile.ROOMWALL))
+    return true;
+  return false;
+}
+
+Dungeon.prototype.createRoom = function(location,dir,rect,callback=null,width=RNR(4,8),height=RNR(4,8),floor=tile.FLOOR,door=tile.DOOR,wall=tile.WALL)
+{
   if ((dir == direction.NORTH) || (dir == direction.SOUTH))
     var offset = RNR(-width/2,0);
   else
@@ -258,32 +328,32 @@ Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=
     for (var j=0;j<height;j++)
     {
       if ((i==0) || (i==width-1) || (j==0) || (j==height-1))
-	var t = tile.WALL;
+	var t = wall;
       else
-	var t = tile.FLOOR;
+	var t = floor;
 	
       if (dir == direction.NORTH)
       {
 	var t = this.getCell(location.x+i+offset,location.y-j);
-	if ((t != tile.UNUSED) && (t != tile.WALL))
+	if ((t != tile.UNUSED) && (!this.isWall(t)))
 	  return false;
       }
       else if (dir == direction.SOUTH)
       {
 	var t = this.getCell(location.x+i+offset,location.y+j);
-	if  ((t != tile.UNUSED) && (t != tile.WALL))
+	if  ((t != tile.UNUSED) && (!this.isWall(t)))
 	  return false;
       }
       else if (dir == direction.EAST)
       {
 	var t = this.getCell(location.x+i,location.y+j+offset);
-	if ((t != tile.UNUSED) && (t != tile.WALL))
+	if ((t != tile.UNUSED) && (!this.isWall(t)))
 	  return false;
       }
       else if (dir == direction.WEST)
       {
 	var t = this.getCell(location.x-i,location.y+j+offset);
-	if ((t != tile.UNUSED) && (t != tile.WALL))
+	if ((t != tile.UNUSED) && (!this.isWall(t)))
 	  return false;
       }
     }
@@ -292,7 +362,7 @@ Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=
     for (var j=0;j<height;j++)
     {
       if ((i==0) || (i==width-1) || (j==0) || (j==height-1))
-	var t = tile.WALL;
+	var t = wall;
       else
 	var t = floor;
 	
@@ -306,10 +376,11 @@ Dungeon.prototype.createRoom = function(location,dir,rect,floor=tile.FLOOR,door=
 	this.setCell(location.x-i,location.y+j+offset,t)
     }
       
-  this.setTile(location,floor);
   this.setTile(location,door);
-  this.enemies.push({location:location,enemy:enemy.BANDIT});
+  if (callback != null)
+    callback(this,location,width,height,dir,offset);
   this.roomCount++;
+  return true;
 }
 
 Dungeon.prototype.oppositeDirection = function(dir)

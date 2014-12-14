@@ -32,8 +32,13 @@ WorldArea.prototype.configureDungeonEntrances = function()
     {
       var rx = RNR(0,2);
       var ry = RNR(0,2);
-      var inx = RNR(5,this.mapSize-5);
-      var iny = RNR(5,this.mapSize-5);
+      if (i==0)
+      {
+	rx = 0;
+        ry = 0;
+      }
+      var inx = RNR(5,this.mapSize-6);
+      var iny = RNR(5,this.mapSize-6);
       var origin = {x:inx+rx*this.mapSize,y:iny+ry*this.mapSize};
       var loops = 0;
       while (!this.levels[1].generateRegionDungeon(origin,rx,ry))
