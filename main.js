@@ -26,7 +26,7 @@ var mainState = {
 	this.world.start();
 	this.currentLevel = this.world.getLevel();
 	log.append("Welcome to the game, " + this.player.name + " the " + this.player.class.name+".");
-	gui.createDialog("The Evil Empire of Takoth has stolen the Talisman of Doom. You must recover it to save the Kingdom!");
+	//gui.createDialog("The Evil Empire of Takoth has stolen the Talisman of Doom. You must recover it to save the Kingdom!");
 	gui.update();
     },
 

@@ -238,7 +238,7 @@ Generator.prototype.squareDiamondMap = function()
 	{
 	    for (var j=0;j<Math.floor(regionSize/squaresize);j++)
 	    {
-		console.log("i:"+i+", j:"+j+", loop:"+loop+", squaresize:"+squaresize);
+		//console.log("i:"+i+", j:"+j+", loop:"+loop+", squaresize:"+squaresize);
 	      // For setting topmid value of square defined by squaresize
 		var a,b,c,d;//a=highermid; b=topright; c=topleft; d=midmid
 	      

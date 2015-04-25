@@ -11,10 +11,16 @@ Surface.prototype.generate = function()
 {
     var gen = new Generator(this.mapSize,this.entrances);
     gen.generateSurface(this.challengeLevel);
-    this.levelMap = gen.getLevelMap();
+    var newMap = gen.getLevelMap();
     this.objects = gen.getObjects();
     this.enemies = gen.getEnemies();
     this.entrances = gen.getEntrances();
+    
+    this.levelMap = [];
+    for (var i=0;i<60;i++)
+    {
+      this.levelMap.push([]);
+      for (var j=0;j<60;j++)
+	this.levelMap[i][j] = Dungeon.convertTileToFloorType(newMap[i][j]);
+    }
 }
-
-
