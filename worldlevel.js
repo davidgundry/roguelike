@@ -1,3 +1,12 @@
+var floorType = {
+      SEA : 0,
+      GRASS: 8,
+      SAND: 4,
+      WALL: 24,
+      ROCK: 16,
+      FLOOR: 4
+    }
+
 function WorldLevel(worldArea,levelID)
 {
     this.levelID = levelID;
@@ -6,6 +15,9 @@ function WorldLevel(worldArea,levelID)
     this.regionSize = 20 * 3;
     this.mapSize = 20;
     this.roomCount = 0;
+    
+    this.entrances = [];
+    this.exits = [];
     
     this.objects = [];
     this.enemies = [];
@@ -21,6 +33,8 @@ function WorldLevel(worldArea,levelID)
     this.layer = null;
     this.minimap = null;
     this.minimapLayer = null;
+    
+    this.challengeLevel = Math.ceil(this.levelID/2);
     console.log("Constructed WorldLevel");
 }
 
@@ -38,12 +52,20 @@ WorldLevel.prototype.create = function(player)
 
 WorldLevel.prototype.destroy = function()
 {
+    this.updateEnemyPositions();
+    this.killAll();
     if (this.map != null)
       this.map.destroy();
     if (this.layer != null)
       this.layer.destroy();
-    this.updateEnemyPositions();
-    this.killAll();
+    if (this.minimap != null)
+      this.minimap.destroy();
+    if (this.minimapLayer != null)
+      this.minimapLayer.destroy();
+    this.map = null;
+    this.layer = null;
+    this.minimap = null;
+    this.minimapLayer = null;
 }
 
 WorldLevel.prototype.updateEnemyPositions = function()
@@ -76,13 +98,17 @@ WorldLevel.prototype.targetToLocation = function(target)
 
 WorldLevel.prototype.createObjects = function()
 {
+  if (this.objectsGroup != null)
+    this.objectsGroup.destroy();
+  this.objectsGroup = game.add.group();
   for (var i=0;i<this.objects.length;i++)
   {
     if (Math.floor(this.objects[i].location.x / this.mapSize) == this.regionX)
       if (Math.floor(this.objects[i].location.y / this.mapSize) == this.regionY)
       {
 	var objectSprite = game.add.sprite(this.objects[i].location.x%this.mapSize*tileWidth,this.objects[i].location.y%this.mapSize*tileHeight,'objects');
-	objectSprite.frame=73;
+	objectSprite.frame=this.objects[i].object.frame;
+	this.objectsGroup.add(objectSprite);
       }
   }
 }
@@ -117,9 +143,17 @@ WorldLevel.prototype.createCurrentRegion = function()
 WorldLevel.prototype.killAll = function()
 {
     for (var i=0;i<this.monsters.length;i++)
+    {
+      this.monsters[i].sprite.animations.stop();
       this.monsters[i].sprite.destroy();
+      this.monsters[i] = null;
+    }
     for (var i=0;i<this.loot.length;i++)
+    {
+      this.loot[i].sprite.animations.stop();
       this.loot[i].sprite.destroy();
+      this.loot[i] = null;
+    }
     this.monsters = [];
     this.loot = [];
 }
@@ -130,9 +164,8 @@ WorldLevel.prototype.changeRegionRight = function()
   {
       this.destroy();
       this.regionX++;
+      this.player.target = {x:0,y:this.player.target.y};
       this.createCurrentRegion();
-      this.player.target.x = 0;
-      this.player.recreate();
   }
 }
 
@@ -142,9 +175,8 @@ WorldLevel.prototype.changeRegionLeft = function()
   {
       this.destroy();
       this.regionX--;
+      this.player.target.x = this.mapSize-1;
       this.createCurrentRegion();
-      this.player.target.x = this.mapSize;
-      this.player.recreate();
   }
 }
 
@@ -154,9 +186,8 @@ WorldLevel.prototype.changeRegionUp = function()
   {
       this.destroy();
       this.regionY--;
+      this.player.target.y = this.mapSize-1;
       this.createCurrentRegion();
-      this.player.target.y = this.mapSize;
-      this.player.recreate();
   }
 }
 
@@ -166,9 +197,8 @@ WorldLevel.prototype.changeRegionDown = function()
   {
       this.destroy();
       this.regionY++;
-      this.createCurrentRegion();
       this.player.target.y = 0;
-      this.player.recreate();
+      this.createCurrentRegion();
   }
 }
 
@@ -240,22 +270,9 @@ WorldLevel.prototype.createMonsters = function()
     for (var i=0;i<this.enemies.length;i++)
     {
 	if (this.enemies[i].location.x != -1)
-	{
-	  if (Math.floor(this.enemies[i].location.x / this.mapSize) == this.regionX)
+	    if (Math.floor(this.enemies[i].location.x / this.mapSize) == this.regionX)
 		if (Math.floor(this.enemies[i].location.y / this.mapSize) == this.regionY)
-		    switch (this.enemies[i].enemy)
-		    {
-			case enemy.BANDIT:
-			  this.monsters.push(new MonsterBandit(this.enemies[i].location.x%this.mapSize,this.enemies[i].location.y%this.mapSize,this));
-			  break;
-			case enemy.GOLEM:
-			  this.monsters.push(new MonsterGolem(this.enemies[i].location.x%this.mapSize,this.enemies[i].location.y%this.mapSize,this));
-			  break;
-			case enemy.ANIMAL:
-			  this.monsters.push(new MonsterAnimal(this.enemies[i].location.x%this.mapSize,this.enemies[i].location.y%this.mapSize,this));
-			  break;
-		    }
-	}
+		    this.monsters.push(new Monster(this.enemies[i].enemy,this.enemies[i].location.x%this.mapSize,this.enemies[i].location.y%this.mapSize,this));
     }
 }
 
@@ -311,19 +328,220 @@ WorldLevel.prototype.getObjectAt = function(target)
     return null;
 }
 
+WorldLevel.prototype.setObjectAt = function(target,o)
+{
+    for (var i=0;i<this.objects.length;i++)
+    {
+	if ((this.objects[i].location.x == target.x+(this.mapSize*this.regionX)) && (this.objects[i].location.y == target.y+(this.mapSize*this.regionY)))
+	{
+	    this.objects[i].object = o;
+	    return true;
+	}
+    }
+    return false
+}
+
+WorldLevel.prototype.removeObjectAt = function(target)
+{
+    for (var i=0;i<this.objects.length;i++)
+    {
+	if ((this.objects[i].location.x == target.x+(this.mapSize*this.regionX)) && (this.objects[i].location.y == target.y+(this.mapSize*this.regionY)))
+	{
+	    this.objects.splice(i,1);
+	    return true;
+	}
+    }
+    return false;
+}
+
+WorldLevel.prototype.addObject = function(location,object)
+{
+    this.objects.push({location:location,object:object});
+}
+
 WorldLevel.prototype.useObjectAt = function(target)
 {
     var o = this.getObjectAt(target);
     if (o != null)
     {
-      if (o.object == object.STEPSUP)
+      switch (o.object)
+      {
+	case object.STEPSUP:
 	  this.worldArea.switchLevel(this.levelID-1);
-      else if (o.object == object.STEPSDOWN)
+	  log.append("You go up the steps.");
+	  return true;
+	  break;
+	case object.STEPSDOWN:
 	  this.worldArea.switchLevel(this.levelID+1);
-      
+	  log.append("You go down the steps.");
+	  return true;
+	  break;
+	case object.TRAPDOOR:
+	  this.setObjectAt(target,object.HOLE);
+	  log.append("You fell through a trapdoor!");
+	  this.worldArea.switchLevel(this.levelID+1);
+	  return false;
+	  break;
+	case object.HOLE:
+	  log.append("You fell down a hole!");
+	  this.worldArea.switchLevel(this.levelID+1);
+	  return false;
+	  break;
+	case object.TELEPORT:
+	  log.append("You have been teleported!");
+	  var snd = game.add.audio('SND_TELE');
+	  snd.play();
+	  return true;
+	  break;
+	case object.DOOR:
+	  this.removeObjectAt(target);
+	  return true;
+	  break;
+	case object.LOCKEDDOOR:
+	  log.append("The door is locked");
+	  var snd = game.add.audio('SND_LOCK');
+	  snd.play();
+	  return true;
+	  break;
+	case object.TRAPPEDDOOR:
+	  log.append("Boom! The door was trapped!");
+	  var snd = game.add.audio('SND_TRAP');
+	  snd.play();
+	  return true;
+	  break;
+	case object.SECRETDOOR:
+	  log.append("You find a secret door!");
+	  this.setCellAt(target,4);
+	  return true;
+	  break;
+	case object.GATE:
+	  return true;
+	  break;
+	case object.LEVER:
+	  log.append("You hear the sound of a gate opening in the distance...");
+	  var snd = game.add.audio('SND_LEVR');
+	  snd.play();
+	  return true;
+	  break;
+	case object.PRESSUREPLATE:
+	  log.append("You stepped on a pressure plate!");
+	  var snd = game.add.audio('SND_PPLT');
+	  snd.play();
+	  return false;
+	  break;
+	case object.CHEST:
+	  this.setObjectAt(target,object.OPENCHEST);
+	  this.player.gainObject(this.randomChestContents(this.challengeLevel));
+	  return true;
+	  break;
+	case object.LOCKEDCHEST:
+	  log.append("The chest is locked.");
+	  var snd = game.add.audio('SND_LOCK');
+	  snd.play();
+	  return true;
+	  break;
+	case object.TRAPPEDCHEST:
+	  log.append("Boom! The chest was trapped!");
+	  var snd = game.add.audio('SND_TRAP');
+	  snd.play();
+	  return true;
+	  break;
+	case object.OPENCHEST:
+	  return true;
+	  break;
+	case object.TRASHHEAP:
+	  this.setObjectAt(target,object.EMPTYHEAP);
+	  return true;
+	  break;
+	case object.EMPTYHEAP:
+	  return true;
+	  break;
+	case object.BOOKCASE:
+	  this.setObjectAt(target,object.EMPTYBOOKCASE);
+	  return true;
+	  break;
+	case object.EMPTYBOOKCASE:
+	  return true;
+	  break;
+	case object.FOUNTAIN:
+	  log.append("You drink from the fountain.");
+	  this.setObjectAt(target,object.DRYFOUNTAIN);
+	  var snd = game.add.audio('SND_GULP');
+	  this.player.heal(10);
+	  snd.play();
+	  return true;
+	  break;
+	case object.DRYFOUNTAIN:
+	  return true;
+	  break;
+	case object.BED:
+	  return true;
+	  break;
+	case object.CTREE:
+	  return true;
+	  break;
+	case object.DTREE:
+	  return true;
+	  break;
+	case object.CACTUS:
+	  return true;
+	  break;
+	case object.APPLETREE:
+	  this.setObjectAt(target,object.DTREE);
+	  this.player.heal(1);
+	  log.append("Eating an apple restores 1 HP.");
+	  var snd = game.add.audio('SND_APPL');
+	  snd.play();
+	  return true;
+	  break;
+      }
     }
     else
       console.log("Attempted to use non-existant object");
+}
+
+WorldLevel.prototype.randomChestContents = function(challengeLevel)
+{
+    var r = RNR(1,100)
+    if (r >= 0) //90
+    {
+      var o = this.objectByChallengeLevel(challengeLevel);
+      if (o != null)
+	return o;
+    }
+    
+    return armour[0];
+}
+
+WorldLevel.prototype.objectByChallengeLevel = function(challengeLevel)
+{
+    var a;
+    switch (RNR(0,3))
+    {
+      case 0:
+	a = weapon;
+	break;
+      case 1:
+	a = armour;
+	break;
+      case 2:
+	a = hat;
+	break;
+      case 3:
+	a = amulet;
+	break;
+    }
+    for (var i=1;i<a.length;i++)
+    {
+      if (a[i].level > challengeLevel)
+	return a[i-1];
+    }
+    return a[a.length-1];
+}
+
+WorldLevel.prototype.setCellAt = function(target,newCell)
+{
+    this.levelMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize] = newCell;
 }
 
 WorldLevel.prototype.isPlayerAt = function(target)
@@ -343,23 +561,19 @@ WorldLevel.prototype.getMonsterAt = function(target)
 
 WorldLevel.prototype.isValidTarget = function(target)
 {
-    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
-    {
-	if (this.levelMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]>3)
-	  if (this.levelMap[target.x+this.regionX*this.mapSize][target.y+this.regionY*this.mapSize]<10)
-	      return true;
-    }
-    return false;
+    return this.isValidLocation({x:target.x+this.regionX*this.mapSize,y:target.y+this.regionY*this.mapSize});
 }
 
 
 WorldLevel.prototype.isValidLocation = function(target)
 {
-    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize) && (target.y<this.mapSize))
+    if ((target.x >= 0) && (target.y >= 0) && (target.x<this.mapSize*3) && (target.y<this.mapSize*3))
     {
-	if (this.array[target.x][target.y]>3)
-	  if (this.array[target.x][target.y]<10)
-	      return true;
+	var t = this.levelMap[target.x][target.y];
+	if ((t>=4) && (t<= 15))
+	  return true;
+	else if ((t>=20) && (t<= 23))
+	  return true;
     }
     return false;
 }
@@ -375,7 +589,7 @@ WorldLevel.prototype.createMinimap = function()
 	for (var j=0;j<this.mapSize*3;j++)
 	{
 	  var index = this.levelMap[i][j];
-	  bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,i*4,j*4,4,4);
+	  bmd.copy('minitileset',2*(index%8),2*(Math.floor(index/8)),2,2,i*4,j*4,4,4);
 	}
     if (this.minimap != null)
       this.minimap.destroy();
@@ -391,22 +605,22 @@ WorldLevel.prototype.updateMinimapLayer = function()
   {
     for (var k=0;k<this.objects.length;k++)
     {
-      var index = 0;
-      bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.objects[k].location.x)*4,(this.objects[k].location.y)*4,4,4);
+      var index = 29;
+      bmd.copy('minitileset',2*(index%8),2*(Math.floor(index/8)),2,2,(this.objects[k].location.x)*4,(this.objects[k].location.y)*4,4,4);
     }
   }
   if (this.monsters != null)
   {
     for (var k=0;k<this.monsters.length;k++)
     {
-      var index = 27;
-      bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.monsters[k].target.x+this.regionX*this.mapSize)*4,(this.monsters[k].target.y+this.regionY*this.mapSize)*4,4,4);
+      var index = 28;
+      bmd.copy('minitileset',2*(index%8),2*(Math.floor(index/8)),2,2,(this.monsters[k].target.x+this.regionX*this.mapSize)*4,(this.monsters[k].target.y+this.regionY*this.mapSize)*4,4,4);
     }
   }
   if (this.player != null)
   {
-    var index = 26;
-    bmd.copy('minitileset',2*(index%7),2*(Math.floor(index/7)),2,2,(this.player.target.x+this.regionX*this.mapSize)*4,(this.player.target.y+this.regionY*this.mapSize)*4,4,4);
+    var index = 30;
+    bmd.copy('minitileset',2*(index%8),2*(Math.floor(index/8)),2,2,(this.player.target.x+this.regionX*this.mapSize)*4,(this.player.target.y+this.regionY*this.mapSize)*4,4,4);
   }
   //if (this.minimapLayer != null)
   //    this.minimapLayer.destroy();
@@ -414,3 +628,20 @@ WorldLevel.prototype.updateMinimapLayer = function()
   this.minimapLayer.anchor.setTo(0,0);
 }
 
+WorldLevel.prototype.placePlayerRandomly = function()
+{
+    while (true)
+    {
+	var x = RNR(0,this.mapSize*3);
+	var y = RNR(0,this.mapSize*3);
+	if (this.isValidLocation({x:x,y:y}))
+	{
+	  this.regionX =Math.floor(x/20);
+	  this.regionY = Math.floor(y/20);
+	  this.player.target = {x:x%20,y:y%20};
+	  this.destroy();
+	  this.createCurrentRegion();
+	  break;
+	}
+    }
+}

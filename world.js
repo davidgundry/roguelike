@@ -19,6 +19,8 @@ World.prototype.create = function(player)
 World.prototype.start = function()
 {
     this.getArea().create(this.player);
+    this.worldAreas[0].switchLevel(1); // This line starts the player in a dungeon.
+    this.getArea().getLevel().placePlayerRandomly();
 }
 
 World.prototype.getArea = function()

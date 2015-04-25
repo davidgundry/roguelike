@@ -1,5 +1,28 @@
-function Loot(x,y)
+var loot = {
+  NONE: {name:"None"},
+  COPPERCOIN: {name:"Copper Coin",frames:[0,1,2,3,4,5,6,7]},
+  SILVERCOIN: {name:"Silver Coin",frames:[8,9,10,11,12,13,14,15]},
+  GOLDCOIN: {name:"Gold Coin",frames:[16,17,18,19,20,21,22,23]},
+  GARNET: {name:"Garnet",frames:[24]},
+  EMERALD: {name:"Emerald",frames:[25]},
+  SAPPHIRE: {name:"Sapphire",frames:[26]},
+  REDPOTION: {name:"Potion",frames:[27]},
+  BLUEPOTION: {name:"Mana Potion",frames:[28]}
+}
+
+function Loot(lootType,x,y)
 {
+  this.loot = lootType;
+  this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'loot');
+  this.sprite.anchor.setTo(0.5,0.5);
+  this.target = {x:x,y:y};
+  if (this.loot.frames.length > 1)
+  {
+    this.sprite.animations.add('anim', this.loot.frames, 12, true);
+    this.sprite.animations.play('anim');
+  }
+  else
+    this.sprite.frame=this.loot.frames[0];
 }
 
 Loot.prototype.kill = function()
@@ -10,10 +33,42 @@ Loot.prototype.kill = function()
 
 Loot.prototype.pickedUp = function(player)
 {
+    switch (this.loot)
+    {
+      case loot.COPPERCOIN:
+	  player.gainCoins(1);
+	  break;
+      case loot.SILVERCOIN:
+	  player.gainCoins(5);
+	  break;
+      case loot.GOLDCOIN:
+	  player.gainCoins(25);
+	  break;
+      case loot.GARNET:
+	  player.gainCoins(50);
+	  break;
+      case loot.EMERALD:
+	  player.gainCoins(100);
+      case loot.SAPPHIRE:
+	  player.gainCoins(200);
+	  break;
+      case loot.REDPOTION:
+	  player.heal(10);
+	  log.append("The potion restores 10 HP");
+	  var potion = game.add.audio('SND_GULP');
+	  potion.play();
+	  break;
+      case loot.BLUEPOTION:
+	  log.append("The potion (will) restore 10 MP");
+	  var potion = game.add.audio('SND_GULP');
+	  potion.play();
+	  break;
+    }
     this.kill();
+    gui.update();
 }
 
-
+/*
 Potion.prototype = new Loot();
 Potion.prototype.constructor=Potion;
 function Potion(x,y)
@@ -29,55 +84,4 @@ function Potion(x,y)
     this.sprite.frame=41;
   else 
     this.sprite.frame=47;
-}
-
-
-Potion.prototype.pickedUp = function(player)
-{
-    player.hitPoints += 10;
-    log.append("The potion restores 10 HP");
-    if (player.hitPoints > player.maxHitPoints)
-      player.hitPoints = player.maxHitPoints;
-    player.updateHitBar();
-    var potion = game.add.audio('potion');
-    potion.play();
-    this.kill();
-}
-
-
-Coin.prototype = new Loot();
-Coin.prototype.constructor=Coin;
-function Coin(x,y,denomination)
-{
-  this.sprite = game.add.sprite(x*tileWidth+tileWidth/2,y*tileHeight+tileHeight/2,'loot');
-  this.sprite.anchor.setTo(0.5,0.5);
-  this.target = {x:x,y:y};
-  this.sprite.animations.add('lootcpspin', [0,1,2,3,4,5,6,7], 12, true);
-  this.sprite.animations.add('lootspspin', [8,9,10,11,12,13,14,15], 12, true);
-  this.sprite.animations.add('lootgpspin', [16,17,18,19,20,21,22,23], 12, true);
-  this.sprite.frame=0;
-  if (denomination == 2)
-  {
-    this.sprite.animations.play('lootgpspin');
-    this.value = 10;
-  }
-  if (denomination == 1)
-  {
-    this.sprite.animations.play('lootspspin');
-    this.value = 5;
-  }
-  else
-  {
-    this.sprite.animations.play('lootcpspin');
-    this.value = 1;
-  }
-}
-
-
-Coin.prototype.pickedUp = function(player)
-{
-    player.coins+= this.value;
-    var coin = game.add.audio('coin');
-    coin.play();
-    this.kill();
-}
+}*/
