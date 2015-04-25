@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Dungeon Generator</title>
+    <script type="text/javascript" src="dungeonGen.js"></script>
+  </head>
+
+  <body style="font-family:mono; font-size:15pt; line-height:60%;margin:0;padding:0;">
+    <div style="">
+      <script type="text/javascript">
+	var levelTag = true;
+	var width = 25;
+	var height = 25;
+	var origins = [{x:DungeonGen.RNR(3,width-4),y:DungeonGen.RNR(3,height-4),direction:DungeonGen.direction.random(),type:DungeonGen.origin.random()}];
+	var targetWaysDown = 2;
+	var defaultMinSize = 4;
+	var defaultMaxSize = 10;
+	var targetRooms = 4;
+	var targetDoorRatio = 0.6;
+	var maxFloors = 3;
+      
+	for (var n=0;n<maxFloors;n++)
+	{
+	  var generator = new DungeonGen(width,height,origins,targetWaysDown,defaultMinSize,defaultMaxSize);
+	  if (n<maxFloors-1)
+	    var dungeon = generator.generate(targetRooms,targetDoorRatio,true); 
+	  else
+	    var dungeon = generator.generate(targetRooms,targetDoorRatio,false); 
+	  
+	  if (levelTag)
+	    document.write("<span style='font-size:10pt;'>Level "+n + "</span><br />");
+	  for (var i=0;i<dungeon.length;i++)
+	  {
+	    for (var j=0;j<dungeon[i].length;j++)
+	    {
+		document.write(DungeonGen.tile.textConvert(dungeon[i][j]));
+	    }
+	    document.write("<br />");
+	  }
+	  
+	  origins = generator.getWaysDown();
+	}
+	
+      </script>
+    </div>
+  </body>
+</html>

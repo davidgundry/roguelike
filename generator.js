@@ -24,8 +24,7 @@ function Generator(mapSize, exits)
 	
     this.levelMap = [];
     this.objects = [];
-    this.enemies = [];
-    
+    this.enemies = [];   
 }
 
 Generator.prototype.getLevelMap = function()
@@ -260,7 +259,7 @@ Generator.prototype.squareDiamondMap = function()
 		    d = array[i*squaresize + Math.floor(squaresize/2)][Math.floor(squaresize/2) + j*squaresize-regionSize];
 		
 		var diamondav = Math.round((a + b + c + d)/4);
-		console.log("diamondav:"+diamondav);
+		//console.log("diamondav:"+diamondav);
 		array[i*squaresize + Math.floor(squaresize/2)][j*squaresize] = diamondav + RNR(-randomNumberRange,randomNumberRange);
 				
 		// For setting leftmid of square defined by squaresize
@@ -280,7 +279,7 @@ Generator.prototype.squareDiamondMap = function()
 		
 		var diamondav2 = Math.floor((w + x + y + z)/4);
 		array[i*squaresize][j*squaresize + Math.floor(squaresize/2)] = diamondav2 + RNR(-randomNumberRange,randomNumberRange);
-		console.log("diamondav2:"+diamondav2);
+		//console.log("diamondav2:"+diamondav2);
 		
 		// For setting rightmmid of square defined by squaresize
 		var x,y,w,z; //w=rightermid; x=topright; y=bottomright; midmid
@@ -310,7 +309,7 @@ Generator.prototype.squareDiamondMap = function()
 		
 		var diamondav3 = Math.floor((w + x + y + z)/4);
 		array[(i+1)*squaresize][j*squaresize+ Math.floor(squaresize/2)] = diamondav3 + RNR(-randomNumberRange,randomNumberRange);
-		console.log("diamondav3:"+diamondav3);
+		//console.log("diamondav3:"+diamondav3);
 		
 		
 		// For setting bottommid value of square defined by squaresize
@@ -331,7 +330,7 @@ Generator.prototype.squareDiamondMap = function()
 		
 		var diamondav4 = Math.round((a + b + c + d)/4);
 		array[i*squaresize + Math.floor(squaresize/2)][(j+1)*squaresize] = diamondav4 + RNR(-randomNumberRange,randomNumberRange);
-		console.log("diamondav4:"+diamondav4);
+		//console.log("diamondav4:"+diamondav4);
 	    }
 	}
 	

@@ -62,10 +62,10 @@ Dungeon.prototype.initialise = function(exits)
 
 Dungeon.prototype.generate = function()
 {
-    var gen = new Generator(this.mapSize,this.exits);
-    gen.generateDungeon(this.challengeLevel);
-    this.levelMap = gen.getLevelMap();
+    var gen = new DungeonGen(this.mapSize*3+1,this.mapSize*3+1,this.exits,2);
+    gen.generate(10,0.5,true);//this.challengeLevel);
+    this.levelMap = gen.array;
     this.objects = gen.getObjects();
     this.enemies = gen.getEnemies();
-    this.entrances = gen.getEntrances();
+    this.entrances = gen.getWaysDown();
 }
