@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <title>Dungeon Generator</title>
     <script type="text/javascript" src="dungeonGen.js"></script>
+    <script type="text/javascript" src="../core/random.js"></script>
+    <script type="text/javascript" src="../core/direction.js"></script>
   </head>
 
   <body style="font-family:mono; font-size:15pt; line-height:60%;margin:0;padding:0;">
@@ -12,7 +14,7 @@
 	var levelTag = true;
 	var width = 60;
 	var height = 60;
-	var origins = [{x:DungeonGen.RNR(3,width-4),y:DungeonGen.RNR(3,height-4),direction:DungeonGen.direction.random(),type:DungeonGen.origin.random()}];
+	var origins = [{x:Core.RNR(3,width-4),y:Core.RNR(3,height-4),direction:Core.direction.random(),type:DungeonGen.origin.random()}];
 	var targetWaysDown = 2;
 	var defaultMinSize = 4;
 	var defaultMaxSize = 10;

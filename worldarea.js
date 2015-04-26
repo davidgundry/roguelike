@@ -44,7 +44,7 @@ WorldArea.prototype.switchLevel = function(level)
     else if (level == this.levels.length)
     {
 	this.levels.push(new Dungeon(this,level));
-	this.levels[level].initialise(this.levels[level-1].entrances);
+	this.levels[level].initialise(this.levels[level-1].waysDown);
 	this.levels[level].generate();
 	this.switchLevel(level);
     }

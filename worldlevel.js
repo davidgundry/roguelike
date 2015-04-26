@@ -1,11 +1,4 @@
-var floorType = {
-      SEA : 0,
-      GRASS: 8,
-      SAND: 4,
-      WALL: 24,
-      ROCK: 16,
-      FLOOR: 4
-    }
+
 
 function WorldLevel(worldArea,levelID)
 {
@@ -16,8 +9,8 @@ function WorldLevel(worldArea,levelID)
     this.mapSize = 20;
     this.roomCount = 0;
     
-    this.entrances = [];
-    this.exits = [];
+    this.waysDown = [];
+    this.waysUp = [];
     
     this.objects = [];
     this.enemies = [];

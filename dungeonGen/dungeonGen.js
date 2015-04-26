@@ -24,8 +24,6 @@ function DungeonGen(mapWidth, mapHeight, origins, targetWaysDown, defaultMinSize
     this.waysDown = [];
     this.wallOpenList = [];
     this.doorOpenList = [];
-	
-    this.enemies = [];
     
     this.roomCount = 0;
     this.openRoomList = [];
@@ -53,14 +51,16 @@ function DungeonGen(mapWidth, mapHeight, origins, targetWaysDown, defaultMinSize
  * @param 	waysDown		if true, ways down will be generated
  * @return				the generated array containing the dungeon
  */
-DungeonGen.prototype.generate = function(targetRooms,targetDoorsRatio,waysDown)
+DungeonGen.prototype.generate = function(targetRooms,targetDoorsRatio,waysDown,cave=false,dungeon=true)
 {
+    if (cave)
+	this.generateAreaCave();
+    
     this.fixOrigins(this.origins);
     
-    this.generateAreaCave();
-
-    for (var i=0;i<this.origins.length;i++)
-	this.generateAreaDungeon(this.origins[i],targetRooms,targetDoorsRatio);
+    if (dungeon)
+	for (var i=0;i<this.origins.length;i++)
+	    this.generateAreaDungeon(this.origins[i],targetRooms,targetDoorsRatio);
 
     if (waysDown)
       this.waysDown = this.generateWaysDown(this.targetWaysDown);
@@ -82,7 +82,7 @@ DungeonGen.prototype.placeDoors = function(target)
     {
 	if (this.doorOpenList.length > 0)
 	{
-	  var r = DungeonGen.RNR(0,this.doorOpenList.length-1);
+	  var r = Core.RNR(0,this.doorOpenList.length-1);
 	  var location = this.doorOpenList[r];
 	  if (!this.isAdjacent(location,DungeonGen.tile.DOOR))
 	  {
@@ -163,8 +163,7 @@ DungeonGen.prototype.fixOrigins = function(origins)
 		    [null,DungeonGen.tile.FIXEDWALL,null]]; 
 	    break;
 	}	
-	
-	if (origins[i].direction == DungeonGen.direction.SOUTH)
+	if (origins[i].direction == Core.direction.SOUTH)
 	{
 	    for (var x=0;x<3;x++)
 	      for (var y=0;y<3;y++)
@@ -173,7 +172,7 @@ DungeonGen.prototype.fixOrigins = function(origins)
 		    this.setCell(origins[i].x-1+x,origins[i].y-1+y,template[x][y]);
 	      }
 	}
-	else if (origins[i].direction == DungeonGen.direction.NORTH)
+	else if (origins[i].direction == Core.direction.NORTH)
 	{
 	    for (var x=0;x<3;x++)
 	      for (var y=0;y<3;y++)
@@ -182,7 +181,7 @@ DungeonGen.prototype.fixOrigins = function(origins)
 		    this.setCell(origins[i].x-1+x,origins[i].y-1+y,template[x][2-y]);
 	      }
 	}
-	else if (origins[i].direction == DungeonGen.direction.EAST)
+	else if (origins[i].direction == Core.direction.EAST)
 	{
 	    for (var x=0;x<3;x++)
 	      for (var y=0;y<3;y++)
@@ -191,7 +190,7 @@ DungeonGen.prototype.fixOrigins = function(origins)
 		    this.setCell(origins[i].x-1+x,origins[i].y-1+y,template[2-y][x]);
 	      }
 	}
-	else if (origins[i].direction == DungeonGen.direction.WEST)
+	else if (origins[i].direction == Core.direction.WEST)
 	{
 	    for (var x=0;x<3;x++)
 	      for (var y=0;y<3;y++)
@@ -261,15 +260,15 @@ DungeonGen.prototype.generateWaysDown = function(target)
       var found = false;
       while ((tries < 100) && (!found))
       {
-	var rx = DungeonGen.RNR(0,2);
-	var ry = DungeonGen.RNR(0,2);
+	var rx = Core.RNR(0,2);
+	var ry = Core.RNR(0,2);
 	if (i==0)
 	{
 	  rx = 0;
 	  ry = 0;
 	}
-	var inx = DungeonGen.RNR(5,this.mapWidth-6);
-	var iny = DungeonGen.RNR(5,this.mapHeight-6);
+	var inx = Core.RNR(5,this.mapWidth-6);
+	var iny = Core.RNR(5,this.mapHeight-6);
 	var x = inx+rx*this.mapWidth;
 	var y = iny+ry*this.mapHeight;
 	
@@ -278,17 +277,17 @@ DungeonGen.prototype.generateWaysDown = function(target)
 	if ((this.getCell(x,y) == DungeonGen.tile.WALL) && (!this.isAdjacent({x:x,y:y},DungeonGen.tile.DOOR)) && (!this.isAdjacent({x:x,y:y},DungeonGen.tile.FIXEDWAYDOWN)))
 	{
 	    if (this.getCell(x,y-1) == DungeonGen.tile.FLOOR)
-		dir = DungeonGen.direction.SOUTH;
+		dir = Core.direction.SOUTH;
 	    if (this.getCell(x,y+1) == DungeonGen.tile.FLOOR)
-		dir = DungeonGen.direction.NORTH;
+		dir = Core.direction.NORTH;
 	    if (this.getCell(x+1,y) == DungeonGen.tile.FLOOR)
-		dir = DungeonGen.direction.WEST;
+		dir = Core.direction.WEST;
 	    if (this.getCell(x-1,y) == DungeonGen.tile.FLOOR)
-		dir = DungeonGen.direction.EAST;
+		dir = Core.direction.EAST;
 			      
 	    var entrance = {x:x,y:y,direction:dir};
 	    entrances.push(entrance);
-	    if (entrance.direction == DungeonGen.direction.NORTH)
+	    if (entrance.direction == Core.direction.NORTH)
 	    {
 		this.setCell(entrance.x,entrance.y+1,DungeonGen.tile.FLOOR);
 		this.setCell(entrance.x,entrance.y-1,DungeonGen.tile.FIXEDWALL);
@@ -297,7 +296,7 @@ DungeonGen.prototype.generateWaysDown = function(target)
 		this.setCellIfUnset(entrance.x+1,entrance.y-1,DungeonGen.tile.FIXEDWALL);
 		this.setCellIfUnset(entrance.x-1,entrance.y-1,DungeonGen.tile.FIXEDWALL);
 	    }
-	    else if (entrance.direction == DungeonGen.direction.SOUTH)
+	    else if (entrance.direction == Core.direction.SOUTH)
 	    {
 		this.setCell(entrance.x,entrance.y-1,DungeonGen.tile.FLOOR);
 		this.setCell(entrance.x,entrance.y+1,DungeonGen.tile.FIXEDWALL);
@@ -306,7 +305,7 @@ DungeonGen.prototype.generateWaysDown = function(target)
 		this.setCellIfUnset(entrance.x+1,entrance.y+1,DungeonGen.tile.FIXEDWALL);
 		this.setCellIfUnset(entrance.x-1,entrance.y+1,DungeonGen.tile.FIXEDWALL);
 	    }
-	    else if (entrance.direction == DungeonGen.direction.EAST)
+	    else if (entrance.direction == Core.direction.EAST)
 	    {
 		this.setCell(entrance.x-1,entrance.y,DungeonGen.tile.FLOOR);
 		this.setCell(entrance.x+1,entrance.y,DungeonGen.tile.FIXEDWALL);
@@ -315,7 +314,7 @@ DungeonGen.prototype.generateWaysDown = function(target)
 		this.setCellIfUnset(entrance.x+1,entrance.y+1,DungeonGen.tile.FIXEDWALL);
 		this.setCellIfUnset(entrance.x+1,entrance.y-1,DungeonGen.tile.FIXEDWALL);
 	    }
-	    else if (entrance.direction == DungeonGen.direction.WEST)
+	    else if (entrance.direction == Core.direction.WEST)
 	    {
 		this.setCell(entrance.x+1,entrance.y,DungeonGen.tile.FLOOR);
 		this.setCell(entrance.x-1,entrance.y,DungeonGen.tile.FIXEDWALL);
@@ -355,7 +354,7 @@ DungeonGen.prototype.createRoomCallback = function(scope,location,rect)
  * @param 	maxTries		maximum number of unsuccessful room creation attempts before giving up
  * @return 	true if successfully generated
  */
-DungeonGen.prototype.generateDenseDungeon = function(orig,rect,roomCallback=null,targetRooms=DungeonGen.RNR(4,8)+this.roomCount,maxTries=100)
+DungeonGen.prototype.generateDenseDungeon = function(orig,rect,roomCallback=null,targetRooms=Core.RNR(4,8)+this.roomCount,maxTries=100)
 {
   var initialDirection = orig.direction;
   
@@ -436,7 +435,7 @@ DungeonGen.prototype.setTile = function(location,tile)
  */
 DungeonGen.prototype.setCell = function(x,y,t)
 {
-  if ((x < this.array.length) && (y < this.array[x].length))
+  if ((x>0) && (y>0) && (x < this.array.length) && (y < this.array[x].length))
   {
     // If there is already a wall here, remove it from the wallOpenList
     // because either it will be replaced by a new wall from a new room
@@ -503,20 +502,20 @@ DungeonGen.prototype.pickWallDirection = function()
 {
   if (this.wallOpenList.length > 0)
   {
-      var r = DungeonGen.RNR(0,this.wallOpenList.length-1);
+      var r = Core.RNR(0,this.wallOpenList.length-1);
       var location = this.wallOpenList[r];
       this.wallOpenList.splice(r,1);
   
       if (!this.isAdjacent(location,DungeonGen.tile.DOOR))
       {
 	if (this.getCell(location.x,location.y-1) == DungeonGen.tile.FLOOR)
-	  return {location:location,direction:DungeonGen.direction.SOUTH};
+	  return {location:location,direction:Core.direction.SOUTH};
 	else if (this.getCell(location.x,location.y+1) == DungeonGen.tile.FLOOR)
-	  return {location:location,direction:DungeonGen.direction.NORTH};
+	  return {location:location,direction:Core.direction.NORTH};
 	else if (this.getCell(location.x-1,location.y) == DungeonGen.tile.FLOOR)
-	  return {location:location,direction:DungeonGen.direction.EAST};
+	  return {location:location,direction:Core.direction.EAST};
 	else if (this.getCell(location.x+1,location.y) == DungeonGen.tile.FLOOR)
-	  return {location:location,direction:DungeonGen.direction.WEST};
+	  return {location:location,direction:Core.direction.WEST};
       }
   }
   return null;
@@ -526,27 +525,27 @@ DungeonGen.prototype.pickWallDirection = function()
 /**
  * Creates a room in the provided place. This will dig into other rooms, but will not replace FIXEDWALL tiles.
  */
-DungeonGen.prototype.digRoom = function(location,dir,rect,callback=null,width=DungeonGen.RNR(3,3),height=DungeonGen.RNR(3,3),floor=DungeonGen.tile.FLOOR,door=DungeonGen.tile.DOOR,wall=DungeonGen.tile.WALL)
+DungeonGen.prototype.digRoom = function(location,dir,rect,callback=null,width=Core.RNR(3,3),height=Core.RNR(3,3),floor=DungeonGen.tile.FLOOR,door=DungeonGen.tile.DOOR,wall=DungeonGen.tile.WALL)
 {
   if (typeof location == 'undefined')
     return false;
   
   switch (dir)
   {
-    case DungeonGen.direction.NORTH:
-      var xoffset = DungeonGen.RNR(1,width/2);
+    case Core.direction.NORTH:
+      var xoffset = Core.RNR(1,width/2);
       var room = {left:location.x-xoffset,right:location.x-xoffset+width-1,top:location.y-height+1,bottom:location.y};
       break;
-    case DungeonGen.direction.SOUTH:
-      var xoffset = DungeonGen.RNR(1,width/2);
+    case Core.direction.SOUTH:
+      var xoffset = Core.RNR(1,width/2);
       var room = {left:location.x-xoffset,right:location.x-xoffset+width-1,top:location.y,bottom:location.y+height-1};
       break;
-    case DungeonGen.direction.EAST:
-      var yoffset = DungeonGen.RNR(1,height/2);
+    case Core.direction.EAST:
+      var yoffset = Core.RNR(1,height/2);
       var room = {left:location.x,right:location.x+width-1,top:location.y-yoffset,bottom:location.y-yoffset+height-1};
       break;
-    case DungeonGen.direction.WEST:
-      var yoffset = DungeonGen.RNR(1,height/2);
+    case Core.direction.WEST:
+      var yoffset = Core.RNR(1,height/2);
       var room = {left:location.x-width+1,right:location.x,top:location.y-yoffset,bottom:location.y-yoffset+height-1};
       break;
     return false;
@@ -592,27 +591,27 @@ DungeonGen.prototype.digRoom = function(location,dir,rect,callback=null,width=Du
  * @param	height 		height of room in cells, including walls
  * @return 	true on success
  */
-DungeonGen.prototype.createRoom = function(location,dir,rect,callback=null,width=DungeonGen.RNR(this.defaultMinSize,this.defaultMaxSize),height=DungeonGen.RNR(this.defaultMinSize,this.defaultMaxSize))
+DungeonGen.prototype.createRoom = function(location,dir,rect,callback=null,width=Core.RNR(this.defaultMinSize,this.defaultMaxSize),height=Core.RNR(this.defaultMinSize,this.defaultMaxSize))
 {
   if (typeof location == 'undefined')
     return false;
   
   switch (dir)
   {
-    case DungeonGen.direction.NORTH:
-      var xoffset = DungeonGen.RNR(2,width/2);
+    case Core.direction.NORTH:
+      var xoffset = Core.RNR(2,width/2);
       var room = {left:location.x-xoffset,right:location.x-xoffset+width-1,top:location.y-height+1,bottom:location.y};
       break;
-    case DungeonGen.direction.SOUTH:
-      var xoffset = DungeonGen.RNR(2,width/2);
+    case Core.direction.SOUTH:
+      var xoffset = Core.RNR(2,width/2);
       var room = {left:location.x-xoffset,right:location.x-xoffset+width-1,top:location.y,bottom:location.y+height-1};
       break;
-    case DungeonGen.direction.EAST:
-      var yoffset = DungeonGen.RNR(2,height/2);
+    case Core.direction.EAST:
+      var yoffset = Core.RNR(2,height/2);
       var room = {left:location.x,right:location.x+width-1,top:location.y-yoffset,bottom:location.y-yoffset+height-1};
       break;
-    case DungeonGen.direction.WEST:
-      var yoffset = DungeonGen.RNR(2,height/2);
+    case Core.direction.WEST:
+      var yoffset = Core.RNR(2,height/2);
       var room = {left:location.x-width+1,right:location.x,top:location.y-yoffset,bottom:location.y-yoffset+height-1};
       break;
     return false;
@@ -795,71 +794,7 @@ DungeonGen.tile = {
 	return "?";
       }
     };
-    
-DungeonGen.direction = {
-  NORTH : "north",
-  SOUTH : "south",
-  EAST : "east",
-  WEST : "west",
-  
-  /**
-  * Returns a random direction
-  * 
-  * @return the direction
-  */
-  random:  function()
-  {
-    switch (DungeonGen.RNR(0,3))
-    {
-      case 0:
-	return DungeonGen.direction.NORTH;
-      case 1:
-	return DungeonGen.direction.EAST;
-      case 2:
-	return DungeonGen.direction.SOUTH;
-      case 3:
-	return DungeonGen.direction.WEST;
-    }
-  },
-  
-  /**
-  * Returns opposite direction to passed argument
-  * 
-  * @param dir 	direction
-  * @return 	opposite direction
-  */
-  opposite: function(dir)
-  {
-      if (dir == DungeonGen.direction.NORTH)
-	return DungeonGen.direction.SOUTH;
-      if (dir == DungeonGen.direction.SOUTH)
-	return DungeonGen.direction.NORTH;
-      if (dir == DungeonGen.direction.EAST)
-	return DungeonGen.direction.WEST;
-      if (dir == DungeonGen.direction.WEST)
-	return DungeonGen.direction.EAST;
-  },
-  
-  /**
-  * Return a location found by moving 1 cell in a given DungeonGen.direction.
-  * 
-  * @param location 	starting location
-  * @param dir 		direction to move
-  * @return 		newcation location
-  */
-  moveLocation: function(location,dir)
-  {
-      if (dir == DungeonGen.direction.NORTH)
-	return {x:location.x,y:location.y-1};
-      if (dir == DungeonGen.direction.SOUTH)
-	return {x:location.x,y:location.y+1};
-      if (dir == DungeonGen.direction.EAST)
-	return {x:location.x-1,y:location.y};
-      if (dir == DungeonGen.direction.WEST)
-	return {x:location.x+1,y:location.y};
-      return location;
-  }
-};
+   
 
 DungeonGen.origin = {
   WAYUP : "wayup",
@@ -874,7 +809,7 @@ DungeonGen.origin = {
   */
   random: function()
   {
-    switch (DungeonGen.RNR(0,2))
+    switch (Core.RNR(0,2))
     {
       case 0:
 	return DungeonGen.origin.WAYUP;
@@ -885,32 +820,6 @@ DungeonGen.origin = {
     }
   }
 };
-
-/**
- * Returns a random integer between two values, inclusive.
- * 
- * @param 	low	minimum value to generate 
- * @param 	high	maximum value to generate
- * @return 		generated number
- */
-DungeonGen.RNR = function(low, high)
-{
-    if (high >=0)
-	high = Math.floor(high);
-    else
-	high = Math.ceil(high);
-    if (low >=0)
-	low = Math.floor(low);
-    else
-	low = Math.ceil(low);
-    var a = Math.round(Math.random()*high)+low;
-    if (a > high)
-	a = high;
-    if (a < low)
-	a = low;
-    return a;
-};
-
 
 DungeonGen.prototype.checkOrigins = function(minSize = 5)
 {
@@ -1012,7 +921,7 @@ DungeonGen.generateCave = function(array,tileProbability=65,numSteps=4)
     for (var i=0; i<array.length;i++)
 	for (var j=0; j<array[i].length;j++)
 	{
-	    if (DungeonGen.RNR(1,100) > tileProbability)
+	    if (Core.RNR(1,100) > tileProbability)
 	      array[i][j] = DungeonGen.tile.UNUSED;
 	    else
 	      array[i][j] = DungeonGen.tile.FLOOR;
@@ -1061,7 +970,7 @@ DungeonGen.caStep = function(array)
  */
 DungeonGen.caNextCell = function(x,y,array)
 {
-    var starvation = DungeonGen.RNR(1,2);
+    var starvation = Core.RNR(1,2);
     var overpopulation = 8;
     var neighbours = DungeonGen.countAliveNeighbours(array, x, y);
     if (array[x][y] == DungeonGen.tile.UNUSED)
@@ -1072,7 +981,7 @@ DungeonGen.caNextCell = function(x,y,array)
 	    return DungeonGen.tile.FLOOR;
 	return DungeonGen.tile.UNUSED
     }
-    else if (neighbours > DungeonGen.RNR(3,5))
+    else if (neighbours > Core.RNR(3,5))
 	return DungeonGen.tile.UNUSED;
     return DungeonGen.tile.FLOOR;
 }
@@ -1094,15 +1003,4 @@ DungeonGen.countAliveNeighbours = function(array, x, y)
 	}
 	
     return count;
-}
-
-DungeonGen.prototype.getEnemies = function()
-{
-    return this.enemies;
-}
-
-//TODO: do generating objects
-DungeonGen.prototype.getObjects = function()
-{
-  return [];
 }

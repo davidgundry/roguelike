@@ -2,31 +2,46 @@ Dungeon.prototype = new WorldLevel();
 Dungeon.constructor = Dungeon;
 function Dungeon(worldArea,levelID) {WorldLevel.call(this,worldArea,levelID);}
 
-Dungeon.prototype.initialise = function(exits)
+Dungeon.prototype.initialise = function(waysUp)
 {
-    this.exits = exits;
+    this.waysUp = waysUp;
 }
 
 Dungeon.prototype.generate = function()
 {
-    var gen = new DungeonGen(this.mapSize*3+1,this.mapSize*3+1,this.exits,2);
-    gen.generate(10,0.5,true);
+    var gen = new DungeonGen(this.mapSize*3+1,this.mapSize*3+1,this.waysUp,2);
+    gen.generate(10,0.5,true,false,true); //no cave, dungeons
     var newMap = gen.array;
-    this.objects = gen.getObjects();
-    this.enemies = gen.getEnemies();
-    this.entrances = gen.getWaysDown();
-    
+
     this.levelMap = [];
     for (var i=0;i<60;i++)
     {
 	this.levelMap.push([]);
 	for (var j=0;j<60;j++)
 	{
-	  this.levelMap[i][j] = Dungeon.convertTileToFloorType(newMap[i][j]);
-	  if (newMap[i][j] == DungeonGen.tile.DOOR)
-	      this.addObject({x:i,y:j},object.DOOR);
+	    this.levelMap[i][j] = Dungeon.convertTileToFloorType(newMap[i][j]);
+	    this.interpretObjects(newMap[i][j],i,j);
 	}
     }
+}
+
+Dungeon.prototype.interpretObjects = function(tile,x,y)
+{
+  var objectToPlace = null;
+  switch (tile)
+  {
+    case DungeonGen.tile.DOOR:
+      objectToPlace = object.DOOR
+      break;
+    case DungeonGen.tile.FIXEDWAYDOWN:
+      objectToPlace = object.STEPSDOWN
+      break;
+    case DungeonGen.tile.FIXEDWAYUP:
+      objectToPlace = object.STEPSUP
+      break;
+  }
+  if (objectToPlace != null)
+    this.addObject({x:x,y:y},objectToPlace);
 }
 
 Dungeon.convertTileToFloorType = function(tile)

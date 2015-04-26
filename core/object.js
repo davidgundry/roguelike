@@ -27,6 +27,5 @@ var object = {
       DTREE : {name:"Tree",frame:24},
       CACTUS : {name:"Cactus",frame:25},
       APPLETREE : {name:"Apple Tree",frame:26}
-      
     }
     

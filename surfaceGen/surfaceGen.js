@@ -1,6 +1,5 @@
 /**
- * Cave can generate a square 2D array of tiles with size mapWidth x mapHeight. 
- * All points passed in origins will be valid entrances to the map.
+ * Can generate a square 2D array of tiles with size mapWidth x mapHeight. 
  * 
  * @param	mapWidth	width of the generated map
  * @param	mapHeight	height of the generated map
@@ -10,7 +9,7 @@ function SurfaceGen(mapWidth, mapHeight)
     this.mapWidth = mapWidth;
     this.mapHeight = mapHeight;
     
-   // this.enemies = [];
+    this.enemies = [];
     this.waysDown = [];
 
     this.array = new Array(this.mapWidth);
@@ -23,22 +22,21 @@ function SurfaceGen(mapWidth, mapHeight)
 }
 
 /**
- *  Generates and returns a dungeon.
+ *  Generates and returns a surface.
  * 
- * @param	waysDown 	whether to generate ways down
  * @return			the generated array containing the dungeon
  */
-SurfaceGen.prototype.generate = function(waysDown)
+SurfaceGen.prototype.generate = function()
 {
     this.generateAreaSurface();
+    this.array = SurfaceGen.placeWaysDown(this.array);
     return this.array;
 }
 
 /**
  * Generates a cave bounded by the whole map size.
  * 
- * @param	origin			x,y,direction object starting point to generate from
- * @return 				the generated array containing the dungeon
+ * @return 			the generated array containing the dungeon
  */
 SurfaceGen.prototype.generateAreaSurface = function()
 {
@@ -63,9 +61,9 @@ SurfaceGen.prototype.generateRegionSurface = function(rect)
 	}
     }
   
-    this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.ROCK,60),SurfaceGen.tile.ROCK);
-    this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.SHALLOWS,50),SurfaceGen.tile.SHALLOWS);
-    this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.SEA,50),SurfaceGen.tile.SEA);
+    this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.ROCK,40),SurfaceGen.tile.ROCK);
+   // this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.SHALLOWS,50),SurfaceGen.tile.SHALLOWS);
+    this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.SEA,55),SurfaceGen.tile.SEA);
  
   return true;
 }
@@ -102,7 +100,7 @@ SurfaceGen.generateSurface = function(array,tile,proportion=50,numSteps=4)
     for (var i=0; i<array.length;i++)
 	for (var j=0; j<array[i].length;j++)
 	{
-	    if (SurfaceGen.RNR(1,100) > proportion)
+	    if (Core.RNR(1,100) > proportion)
 	      array[i][j] = SurfaceGen.tile.UNUSED;
 	    else
 	      array[i][j] = tile;
@@ -150,9 +148,9 @@ SurfaceGen.caStep = function(array,tile)
  */
 SurfaceGen.caNextCell = function(x,y,array,tile)
 {
-    var starvation = SurfaceGen.RNR(1,2);
+    var starvation = Core.RNR(1,2);
     var overpopulation = 8;
-    var neighbours = SurfaceGen.countAliveNeighbours(array, x, y);
+    var neighbours = SurfaceGen.countAliveNeighbours(array, x, y,tile);
     if (array[x][y] == SurfaceGen.tile.UNUSED)
     {
 	if(neighbours < starvation)
@@ -161,12 +159,12 @@ SurfaceGen.caNextCell = function(x,y,array,tile)
 	    return tile;
 	return SurfaceGen.tile.UNUSED
     }
-    else if (neighbours > SurfaceGen.RNR(3,5))
+    else if (neighbours > Core.RNR(3,5))
 	return SurfaceGen.tile.UNUSED;
     return tile;
 }
 
-SurfaceGen.countAliveNeighbours = function(array, x, y)
+SurfaceGen.countAliveNeighbours = function(array, x, y,tile)
 {
     var count = 0;
     for(var i=-1;i<2;i++)
@@ -178,11 +176,47 @@ SurfaceGen.countAliveNeighbours = function(array, x, y)
 	    {}
 	    else if ((neighbourX < 0) || (neighbourY < 0) || (neighbourX >= array.length) || (neighbourY >= array[0].length))
 		count++;
-	    else if (array[neighbourX][neighbourY] == SurfaceGen.tile.UNUSED)
+	    else if (array[neighbourX][neighbourY] != tile)
 		count++;
 	}
 	
     return count;
+}
+
+SurfaceGen.countAliveFourNeighbours = function(array, x, y,tile)
+{
+    var count = 0;
+    for(var i=-1;i<2;i++)
+	for(var j=-1;j<2;j++)
+	{
+	    if (Math.abs(i)+Math.abs(j)==1)
+	    {
+	      var neighbourX = x+i;
+	      var neighbourY = y+j;
+	      if ((i==0) && (j==0))
+	      {}
+	      else if ((neighbourX < 0) || (neighbourY < 0) || (neighbourX >= array.length) || (neighbourY >= array[0].length))
+		  count++;
+	      else if (array[neighbourX][neighbourY] != tile)
+		  count++;
+	    }
+	}
+	
+    return count;
+}
+
+SurfaceGen.placeWaysDown = function(map)
+{
+    for (var x=0; x < map.length; x++){
+	for (var y=0; y < map[0].length; y++){
+	    if(map[x][y] == SurfaceGen.tile.GRASS){
+		var nbs = SurfaceGen.countAliveFourNeighbours(map, x, y,SurfaceGen.tile.GRASS);
+		if((nbs == 3) && (Core.RNR(0,3)==3))
+		    map[x][y] = SurfaceGen.tile.WAYDOWN;
+	    }
+	}
+    }
+    return map;
 }
 
 
@@ -208,6 +242,7 @@ SurfaceGen.tile = {
       ROCK : "rock",
       SEA : "sea",
       SHALLOWS : "shallows",
+      WAYDOWN : "waydown",
    
       
       /**
@@ -234,44 +269,10 @@ SurfaceGen.tile = {
 	  case SurfaceGen.tile.SHALLOWS:
 	    return "<span style='color:lightblue'>&#9640;</span>";
 	    break;
+	  case SurfaceGen.tile.WAYDOWN:
+	    return "&#9661;";
+	    break;
 	}
 	return "?";
       },
     };
-
-/**
- * Returns a random integer between two values, inclusive.
- * 
- * @param 	low	minimum value to generate 
- * @param 	high	maximum value to generate
- * @return 		generated number
- */
-SurfaceGen.RNR = function(low, high)
-{
-    if (high >=0)
-	high = Math.floor(high);
-    else
-	high = Math.ceil(high);
-    if (low >=0)
-	low = Math.floor(low);
-    else
-	low = Math.ceil(low);
-    var a = Math.round(Math.random()*high)+low;
-    if (a > high)
-	a = high;
-    if (a < low)
-	a = low;
-    return a;
-};
-
-
-SurfaceGen.prototype.getEnemies = function()
-{
-    return this.enemies;
-}
-
-//TODO: do generating objects
-SurfaceGen.prototype.getObjects = function()
-{
-  return [];
-}
