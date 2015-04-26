@@ -187,3 +187,20 @@ GUI.prototype.destroyDialog = function()
     this.dialogBackground.destroy();
     this.dialog = false;
 }
+
+
+function Log()
+{
+    this.log = [""];
+}
+
+Log.prototype.append = function(string)
+{
+    this.log.push(string);
+}
+
+Log.prototype.getLast = function()
+{
+    return this.log[this.log.length-1];
+}
+

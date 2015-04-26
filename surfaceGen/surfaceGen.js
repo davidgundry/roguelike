@@ -263,3 +263,15 @@ SurfaceGen.RNR = function(low, high)
 	a = low;
     return a;
 };
+
+
+SurfaceGen.prototype.getEnemies = function()
+{
+    return this.enemies;
+}
+
+//TODO: do generating objects
+SurfaceGen.prototype.getObjects = function()
+{
+  return [];
+}
