@@ -416,11 +416,13 @@ WorldLevel.prototype.useObjectAt = function(target)
       switch (o.object)
       {
 	case object.STEPSUP:
+          this.player.target = target;
 	  this.worldArea.switchLevel(this.levelID-1);
 	  log.append("You go up the steps.");
 	  return true;
 	  break;
 	case object.STEPSDOWN:
+          this.player.target = target;
 	  this.worldArea.switchLevel(this.levelID+1);
 	  log.append("You go down the steps.");
 	  return true;
