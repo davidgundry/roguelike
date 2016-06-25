@@ -9,7 +9,7 @@ Dungeon.prototype.initialise = function(waysUp)
 
 Dungeon.prototype.generate = function()
 {
-    var gen = new DungeonGen(this.mapSize*3+1,this.mapSize*3+1,this.waysUp,5,3,3);
+    var gen = new DungeonGen(this.mapSize*3,this.mapSize*3,this.waysUp,5,3,3);
     gen.generate(10,0.5,true,false,true); //no cave, dungeons
     var newMap = gen.array;
 

@@ -62,19 +62,25 @@ DungeonGen.prototype.generate = function(targetRooms,targetDoorsRatio,waysDown,c
     this.fixOrigins(this.origins);
     
     if (dungeon)
-        if (this.gridX > 0)
+    {
+        if ((this.gridX > 0) && (this.gridY > 0))
         {
-            gridSizeX = this.mapWidth/this.gridX;
-            gridSizeY = this.mapHeight/this.gridY;
+            gridSizeX = Math.floor(this.mapWidth/this.gridX);
+            gridSizeY = Math.floor(this.mapHeight/this.gridY);
             for (var mapX = 0;mapX<this.gridX;mapX++)
                 for (var mapY = 0;mapY<this.gridY;mapY++)
                 {
                     for (var i=0;i<this.origins.length;i++)
                     {
                         origin = this.origins[i];
-                        origin.x = origin.x-mapX*gridSizeX;
-                        origin.y - origin.y-mapY*gridSizeY;
-                        this.generateRegionDungeon({top:0,right:this.gridSizeX-1,bottom:this.gridSizeY-1,left:0},origin,targetRooms,targetDoorsRatio);
+                        //if ((origin.x >= 0) && (origin.y >= 0) && (origin.x < gridSizeX) && (origin.y < gridSizeY))
+                            this.generateRegionDungeon(
+                                {
+                                    top:    mapY*gridSizeY,
+                                    right:  mapX*gridSizeX + this.gridSizeX-1,
+                                    bottom: mapY*gridSizeY + this.gridSizeY-1,
+                                    left:   mapX*gridSizeX
+                                },origin,targetRooms,targetDoorsRatio);
                     }
                 }
         }
@@ -83,6 +89,7 @@ DungeonGen.prototype.generate = function(targetRooms,targetDoorsRatio,waysDown,c
             for (var i=0;i<this.origins.length;i++)
                 this.generateAreaDungeon(this.origins[i],targetRooms,targetDoorsRatio);
         }
+    }
 
     if (waysDown)
       this.waysDown = this.generateWaysDown(this.targetWaysDown);

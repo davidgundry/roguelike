@@ -1,4 +1,4 @@
-function WorldArea(world)
+ function WorldArea(world)
 {
     this.world = world;
     this.currentLevel = -1;
