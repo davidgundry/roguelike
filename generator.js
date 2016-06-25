@@ -182,8 +182,10 @@ Generator.prototype.randomEnemies = function(challengeLevel)
 	      found = true;
 	      enemies.push({location:{x:x,y:y},enemy:etype});
 	    }
+		
 	}
     }
+	console.log("Attemting to place enemies");
     return enemies;
 }
 

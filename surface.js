@@ -22,6 +22,7 @@ Surface.prototype.generate = function()
 	this.interpretObjects(newMap[i][j],i,j);
       }
     }
+    this.enemies = this.randomEnemies(this.levelID);
 }
 
 Surface.prototype.interpretObjects = function(tile,x,y)

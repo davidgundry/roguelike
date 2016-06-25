@@ -9,7 +9,7 @@ Dungeon.prototype.initialise = function(waysUp)
 
 Dungeon.prototype.generate = function()
 {
-    var gen = new DungeonGen(this.mapSize*3+1,this.mapSize*3+1,this.waysUp,2);
+    var gen = new DungeonGen(this.mapSize*3+1,this.mapSize*3+1,this.waysUp,5);
     gen.generate(10,0.5,true,false,true); //no cave, dungeons
     var newMap = gen.array;
 
@@ -23,7 +23,10 @@ Dungeon.prototype.generate = function()
 	    this.interpretObjects(newMap[i][j],i,j);
 	}
     }
+    
+    this.enemies = this.randomEnemies(this.levelID);
 }
+
 
 Dungeon.prototype.interpretObjects = function(tile,x,y)
 {

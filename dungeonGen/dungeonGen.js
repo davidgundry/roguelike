@@ -78,7 +78,7 @@ DungeonGen.prototype.generate = function(targetRooms,targetDoorsRatio,waysDown,c
  */
 DungeonGen.prototype.placeDoors = function(target)
 {
-    for (i=0;i<target;i++)
+    for (var i=0;i<target;i++)
     {
 	if (this.doorOpenList.length > 0)
 	{

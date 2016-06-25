@@ -62,7 +62,7 @@ SurfaceGen.prototype.generateRegionSurface = function(rect)
     }
   
     this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.ROCK,40),SurfaceGen.tile.ROCK);
-   // this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.SHALLOWS,50),SurfaceGen.tile.SHALLOWS);
+    this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.SHALLOWS,50),SurfaceGen.tile.SHALLOWS);
     this.array = SurfaceGen.addLayer(this.array,SurfaceGen.generateSurface(newArray,SurfaceGen.tile.SEA,55),SurfaceGen.tile.SEA);
  
   return true;
@@ -216,7 +216,7 @@ SurfaceGen.placeWaysDown = function(map)
 	    }
 	}
     }
-    return map;
+    return map;	
 }
 
 

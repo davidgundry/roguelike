@@ -61,6 +61,62 @@ WorldLevel.prototype.destroy = function()
     this.minimapLayer = null;
 }
 
+
+WorldLevel.prototype.randomEnemies = function(challengeLevel)
+{
+    var enemies = [];
+    
+    for (var i=0;i<25;i++)
+    {
+        var etype = enemy.CHICKEN;
+      	var r = RNR(1,100);
+	if (challengeLevel== 0)
+	{
+	    if (r > 90)
+	      etype = enemy.BANDIT;
+	    else if (r > 80)
+	      etype = enemy.WOLF;
+	    else if (r > 60)
+	      etype = enemy.DOG;
+	    else if (r > 30)
+	      etype = enemy.COW;
+	    else
+	      etype = enemy.CHICKEN;
+	}
+	else
+	{
+	    if (r >= 80)
+	      etype = enemy.RAT;
+	    else if (r >= 60)
+	      etype = enemy.SNAKE;
+	    else if (r >= 40)
+	      etype = enemy.BEETLE;
+	    else if (r >= 25)
+	      etype = enemy.SCORPION;
+	    else if (r >= 10)
+	      etype = enemy.SPIDER;
+	    else
+	      etype = enemy.GIANTSPIDER;
+	}
+	var x,y;
+	var found = false;
+	var attempts = 0;
+	while ((!found) && (attempts < 10))
+	{
+	    attempts++;
+	    x = RNR(0,this.mapSize*3);
+	    y = RNR(0,this.mapSize*3);
+	    if ((this.isValidLocation({x:x,y:y}))) //&& !(this.isMonsterAtLocation({x:x,y:y})) && !(this.isObjectAtLocation({x:x,y:y})))
+	    {
+	      found = true;
+	      enemies.push({location:{x:x,y:y},enemy:etype});
+	    }
+		
+	}
+    }
+    return enemies;
+}
+
 WorldLevel.prototype.updateEnemyPositions = function()
 {
     var newEnemies = []
