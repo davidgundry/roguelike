@@ -13,13 +13,16 @@ console.log("DungeonGen loaded");
  * @param	defaultMinSize	the minimum dimension a room can be
  * @param	defaultMaxSize	the maximum dimension a room can be
  */
-function DungeonGen(mapWidth, mapHeight, origins, targetWaysDown, defaultMinSize=5, defaultMaxSize=7)
+function DungeonGen(mapWidth, mapHeight, origins, targetWaysDown, gridX=0,gridY=0,defaultMinSize=5, defaultMaxSize=7)
 {
     this.mapWidth = mapWidth;
     this.mapHeight = mapHeight;
     this.origins = origins;
     this.targetWaysDown = targetWaysDown;
     this.externalDoors = false;
+    
+    this.gridX = gridX;
+    this.gridY = gridY;
     
     this.waysDown = [];
     this.wallOpenList = [];
@@ -59,8 +62,27 @@ DungeonGen.prototype.generate = function(targetRooms,targetDoorsRatio,waysDown,c
     this.fixOrigins(this.origins);
     
     if (dungeon)
-	for (var i=0;i<this.origins.length;i++)
-	    this.generateAreaDungeon(this.origins[i],targetRooms,targetDoorsRatio);
+        if (this.gridX > 0)
+        {
+            gridSizeX = this.mapWidth/this.gridX;
+            gridSizeY = this.mapHeight/this.gridY;
+            for (var mapX = 0;mapX<this.gridX;mapX++)
+                for (var mapY = 0;mapY<this.gridY;mapY++)
+                {
+                    for (var i=0;i<this.origins.length;i++)
+                    {
+                        origin = this.origins[i];
+                        origin.x = origin.x-mapX*gridSizeX;
+                        origin.y - origin.y-mapY*gridSizeY;
+                        this.generateRegionDungeon({top:0,right:this.gridSizeX-1,bottom:this.gridSizeY-1,left:0},origin,targetRooms,targetDoorsRatio);
+                    }
+                }
+        }
+        else
+        {
+            for (var i=0;i<this.origins.length;i++)
+                this.generateAreaDungeon(this.origins[i],targetRooms,targetDoorsRatio);
+        }
 
     if (waysDown)
       this.waysDown = this.generateWaysDown(this.targetWaysDown);
